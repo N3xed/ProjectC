@@ -1,0 +1,12 @@
+﻿<Application x:Class="ProjectC_interface.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:ProjectC_interface"
+             StartupUri="MainWindow.xaml"
+             xmlns:System="clr-namespace:System;assembly=mscorlib"
+             DispatcherUnhandledException="Application_DispatcherUnhandledException">
+    <Application.Resources>
+        <System:String x:Key="ApplicationTitle">ProjectC</System:String>
+        <System:String x:Key="AudioTabTitle">Audio</System:String>
+    </Application.Resources>
+</Application>
