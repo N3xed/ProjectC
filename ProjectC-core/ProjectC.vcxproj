@@ -173,7 +173,7 @@
     <ClInclude Include="src\Execution\RoutineManager.h" />
     <ClInclude Include="src\main.cpp" />
     <ClInclude Include="src\Networking\Connection.h" />
-    <ClInclude Include="src\Networking\Context.h" />
+    <ClInclude Include="src\Execution\Context.h" />
     <ClInclude Include="src\Networking\Endpoint.h" />
     <ClInclude Include="src\Networking\TcpConnection.h" />
     <ClInclude Include="src\Networking\TCPServer.h" />
