@@ -4,10 +4,11 @@
 #include <stdint.h>
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
+#include "Connection.h"
 
 namespace ProjectC {
 	namespace Networking {
-		class TcpConnection {
+		class TcpConnection : public Connection {
 			static const uint32_t MAX_PACKET_SIZE = 8192;
 
 			friend class TcpServer;
@@ -25,13 +26,6 @@ namespace ProjectC {
 			void SetReceiveHandler(std::function<void(const uint8_t* data, uint32_t length)> handler) {
 				m_receiveHandler = handler;
 			}
-			boost::asio::ip::tcp::endpoint GetLocalEndpoint() const {
-				return m_socket.local_endpoint();
-			}
-			boost::asio::ip::tcp::endpoint GetRemoteEndpoint() const {
-				return m_endpoint;
-			}
-
 			boost::asio::ip::tcp::socket& GetSocket() {
 				return m_socket;
 			}
@@ -46,6 +40,20 @@ namespace ProjectC {
 			bool Connect(const boost::asio::ip::tcp::endpoint& endpoint);
 			void AsyncConnect(const boost::asio::ip::tcp::endpoint& endpoint, std::function<void(bool, std::exception)> handler);
 			void Close();
+
+			virtual void Send(const uint8_t* buffer, size_t length) override;
+			virtual void SendAsync(const uint8_t* buffer, size_t length, SendHandler handler = SendHandler(nullptr)) override;
+
+			virtual Endpoint GetLocalEndpoint() const override {
+				return Endpoint::FromBoost(m_socket.local_endpoint());
+			}
+			virtual Endpoint GetRemoteEndpoint() const override {
+				return Endpoint::FromBoost(m_socket.remote_endpoint());
+			}
+			virtual ProtocolType GetProtocol() const override {
+				return ProtocolType::TCP;
+			}
+
 		private:
 			void connect_handler(const boost::system::error_code& err_code, std::function<void(bool, std::exception)> handler);
 			void start_receive();

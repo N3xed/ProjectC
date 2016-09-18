@@ -6,9 +6,15 @@ ProjectC::Networking::TcpServer::TcpServer(const boost::asio::ip::tcp::endpoint&
 ProjectC::Networking::TcpServer::~TcpServer()
 {}
 
+void ProjectC::Networking::TcpServer::SetErrorHandler(std::function<void(const std::exception& err)> handler)
+{
+	m_errHandler = handler;
+}
+
 bool ProjectC::Networking::TcpServer::Bind(const boost::asio::ip::tcp::endpoint& endpoint)
 {
 	try {
+		m_acceptor.open(endpoint.protocol());
 		m_acceptor.bind(endpoint);
 	}
 	catch (const boost::system::error_code& err) {
@@ -33,6 +39,17 @@ void ProjectC::Networking::TcpServer::Stop()
 	try {
 		m_running = false;
 		m_acceptor.cancel();
+	}
+	catch (const boost::system::error_code& err_code) {
+		m_errHandler(std::exception(err_code.message().c_str(), err_code.value()));
+	}
+}
+
+void ProjectC::Networking::TcpServer::Close()
+{
+	try {
+		m_running = false;
+		m_acceptor.close();
 	}
 	catch (const boost::system::error_code& err_code) {
 		m_errHandler(std::exception(err_code.message().c_str(), err_code.value()));

@@ -44,12 +44,26 @@ void ProjectC::Networking::TcpConnection::AsyncConnect(const boost::asio::ip::tc
 
 void ProjectC::Networking::TcpConnection::Close()
 {
+	if (m_running)
+		Stop();
 	try {
 		m_socket.close();
 	}
 	catch (const boost::system::error_code& err_code) {
 		m_errorHandler(std::exception(err_code.message().c_str(), err_code.value()));
 	}
+}
+
+void ProjectC::Networking::TcpConnection::Send(const uint8_t* buffer, size_t length)
+{
+	boost::asio::write(m_socket, boost::asio::buffer(buffer, length));
+}
+
+void ProjectC::Networking::TcpConnection::SendAsync(const uint8_t* buffer, size_t length, SendHandler handler)
+{
+	boost::asio::async_write(m_socket, boost::asio::buffer(buffer, length), [&handler](const boost::system::error_code& errCode, size_t bytesWritten) -> void{
+		handler(errCode.value() == 0, std::exception(errCode.message().c_str(), errCode.value()));
+	});
 }
 
 void ProjectC::Networking::TcpConnection::connect_handler(const boost::system::error_code& err_code, std::function<void(bool, std::exception)> handler)
