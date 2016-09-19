@@ -73,7 +73,12 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(ProjectDir)$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(ProjectDir)$(Configuration)\</OutDir>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -141,6 +146,7 @@
   <ItemGroup>
     <ClCompile Include="src\Execution\RoutineArchive.cpp" />
     <ClCompile Include="src\Execution\RoutineManager.cpp" />
+    <ClCompile Include="src\Interface\Window.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Networking\Endpoint.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
@@ -171,6 +177,7 @@
     <ClInclude Include="src\Execution\Routine.h" />
     <ClInclude Include="src\Execution\RoutineArchive.h" />
     <ClInclude Include="src\Execution\RoutineManager.h" />
+    <ClInclude Include="src\Interface\DelegateWrapper.h" />
     <ClInclude Include="src\main.cpp" />
     <ClInclude Include="src\Networking\Connection.h" />
     <ClInclude Include="src\Execution\Context.h" />
@@ -180,6 +187,11 @@
     <ClInclude Include="src\Interface\Window.h" />
     <ClInclude Include="src\Networking\UdpConnection.h" />
     <ClInclude Include="src\Networking\UdpServer.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

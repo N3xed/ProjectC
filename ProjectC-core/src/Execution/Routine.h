@@ -2,7 +2,7 @@
 #pragma unmanaged
 
 #include <stdint.h>
-#include "../Networking/Context.h"
+#include "Context.h"
 #include "../Networking/Connection.h"
 
 namespace ProjectC {

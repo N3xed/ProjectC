@@ -5,7 +5,7 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProjectC-interface", "ProjectC-interface\ProjectC-interface.csproj", "{7C3AFDB6-5945-4F51-9B68-9605FD002010}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ProjectC-core", "ProjectC\ProjectC.vcxproj", "{E7C42C6D-189A-4E22-AB6B-9D2770DFB662}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ProjectC-core", "ProjectC-core\ProjectC.vcxproj", "{E7C42C6D-189A-4E22-AB6B-9D2770DFB662}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -19,11 +19,42 @@ namespace ProjectC_interface {
     /// </summary>
     public partial class MainWindow : Window {
 
+        public delegate void WindowHandler(MainWindow window);
+        
         public Audio.AudioPage AudioTab { get; private set; }
+
+        public WindowHandler ShutdownHandler;
+        public WindowHandler MinimizedHandler;
+        public WindowHandler MaximizedHandler;
 
         public MainWindow() {
             InitializeComponent();
             AudioTab = new Audio.AudioPage(this, audioTab);
+
+            this.Closing += MainWindow_Closing;
+            StateChanged += MainWindow_StateChanged;
+        }
+
+        private void MainWindow_StateChanged(object sender, EventArgs e) {
+            switch(this.WindowState) {
+                case WindowState.Maximized:
+                    MaximizedHandler?.Invoke(this);
+                    break;
+                case WindowState.Minimized:
+                    MinimizedHandler?.Invoke(this);
+                    break;
+            }
+        }
+
+        public void SetTitle(string title) {
+            Invoke(() => {
+                Title = title;
+            });
+        }
+
+        private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e) {
+            //TODO: Animation
+            ShutdownHandler?.Invoke(this);
         }
 
         public void Invoke(Action action) {
