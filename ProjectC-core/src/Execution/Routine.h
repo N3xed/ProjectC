@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 #include "Context.h"
-#include "../Networking/Connection.h"
+#include "../Networking/IConnection.h"
 
 namespace ProjectC {
 	namespace Execution {
@@ -13,7 +13,7 @@ namespace ProjectC {
 
 		class Routine {
 		public:
-			typedef void(*RoutineFunction)(Context& context, Connection& con);
+			typedef void(*RoutineFunction)(Context& context, IConnection& con);
 		private:
 			uint32_t m_id;
 			RoutineFunction m_function;

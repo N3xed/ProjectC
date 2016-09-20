@@ -148,6 +148,7 @@
     <ClCompile Include="src\Execution\RoutineManager.cpp" />
     <ClCompile Include="src\Interface\Window.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\Networking\ByteBuffer.cpp" />
     <ClCompile Include="src\Networking\Endpoint.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
@@ -179,7 +180,9 @@
     <ClInclude Include="src\Execution\RoutineManager.h" />
     <ClInclude Include="src\Interface\DelegateWrapper.h" />
     <ClInclude Include="src\main.cpp" />
-    <ClInclude Include="src\Networking\Connection.h" />
+    <ClInclude Include="src\Networking\ByteBuffer.h" />
+    <ClInclude Include="src\Networking\IByteBuffer.h" />
+    <ClInclude Include="src\Networking\IConnection.h" />
     <ClInclude Include="src\Execution\Context.h" />
     <ClInclude Include="src\Networking\Endpoint.h" />
     <ClInclude Include="src\Networking\TcpConnection.h" />

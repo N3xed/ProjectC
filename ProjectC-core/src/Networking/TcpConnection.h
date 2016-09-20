@@ -4,11 +4,11 @@
 #include <stdint.h>
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
-#include "Connection.h"
+#include "IConnection.h"
 
 namespace ProjectC {
 	namespace Networking {
-		class TcpConnection : public Connection {
+		class TcpConnection : public IConnection {
 			static const uint32_t MAX_PACKET_SIZE = 8192;
 
 			friend class TcpServer;

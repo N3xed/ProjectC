@@ -1,12 +1,12 @@
 #pragma once
 #pragma unmanaged
 
-#include "Connection.h"
+#include "IConnection.h"
 #include "UdpServer.h"
 
 namespace ProjectC {
 	namespace Networking {
-		class UdpConnection : public Connection {
+		class UdpConnection : public IConnection {
 		private:
 			UdpServer& m_server;
 			Endpoint m_localEndpoint;

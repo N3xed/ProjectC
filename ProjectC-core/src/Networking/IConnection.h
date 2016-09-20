@@ -4,11 +4,11 @@
 
 namespace ProjectC {
 	namespace Networking {
-		class Connection {
+		class IConnection {
 		public:
 			typedef std::function<void(bool, const std::exception&)> SendHandler;
 
-			virtual ~Connection() {};
+			virtual ~IConnection() {};
 
 			virtual Endpoint GetLocalEndpoint() const = 0;
 			virtual Endpoint GetRemoteEndpoint() const = 0;
