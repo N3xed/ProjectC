@@ -102,6 +102,41 @@ void ProjectC::Networking::ByteBuffer<boost::endian::order::big>::GetBytes(std::
 	m_current += count;
 }
 
+const uint8_t* ProjectC::Networking::ByteBuffer<boost::endian::order::big>::GetBytes(size_t count)
+{
+	if (Available() < count)
+		throw std::underflow_error("Not enough bytes available.");
+	auto result = m_current;
+	m_current += count;
+	return result;
+}
+
+const uint8_t* ProjectC::Networking::ByteBuffer<boost::endian::order::big>::GetBytes()
+{
+	auto result = m_current;
+	m_current = m_bufferEnd;
+	return result;
+}
+
+void ProjectC::Networking::ByteBuffer<boost::endian::order::big>::Advance(size_t count)
+{
+	if (Available() < count)
+		throw std::underflow_error("Not enough bytes to advance.");
+	m_current += count;
+}
+
+void ProjectC::Networking::ByteBuffer<boost::endian::order::big>::ResetPosition()
+{
+	m_current = m_bufferStart;
+}
+
+void ProjectC::Networking::ByteBuffer<boost::endian::order::big>::Reset(const uint8_t* buffer, uint32_t length)
+{
+	m_bufferStart = buffer;
+	m_bufferEnd = buffer + length;
+	m_current = m_bufferStart;
+}
+
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -206,4 +241,38 @@ void ProjectC::Networking::ByteBuffer<boost::endian::order::little>::GetBytes(st
 		throw std::underflow_error("Not enough bytes available.");
 	vec.insert(vec.end(), m_current, m_current + count);
 	m_current += count;
+}
+
+const uint8_t* ProjectC::Networking::ByteBuffer<boost::endian::order::little>::GetBytes(size_t count)
+{
+	if (Available() < count)
+		throw std::underflow_error("Not enough bytes available.");
+	auto result = m_current;
+	m_current += count;
+	return result;
+}
+
+const uint8_t* ProjectC::Networking::ByteBuffer<boost::endian::order::little>::GetBytes()
+{
+	auto result = m_current;
+	m_current = m_bufferEnd;
+	return result;
+}
+
+void ProjectC::Networking::ByteBuffer<boost::endian::order::little>::Advance(size_t count)
+{
+	if (Available() < count)
+		throw std::underflow_error("Not enough bytes to advance.");
+	m_current += count;
+}
+
+void ProjectC::Networking::ByteBuffer<boost::endian::order::little>::ResetPosition()
+{
+	m_current = m_bufferStart;
+}
+
+void ProjectC::Networking::ByteBuffer<boost::endian::order::little>::Reset(const uint8_t* buffer, uint32_t length)
+{
+	m_bufferStart = buffer;
+	m_bufferEnd = buffer + length;
 }

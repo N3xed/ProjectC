@@ -34,6 +34,12 @@ namespace ProjectC {
 
 			virtual void GetBytes(uint8_t* buffer, size_t count) override;
 			virtual void GetBytes(std::vector<uint8_t>& vec, size_t count) override;
+			virtual const uint8_t* GetBytes(size_t count) override;
+			virtual const uint8_t* GetBytes() override;
+
+			virtual void Advance(size_t count) override;
+			virtual void ResetPosition() override;
+			virtual void Reset(const uint8_t* buffer, uint32_t length) override;
 		};
 
 		template<>
@@ -61,6 +67,12 @@ namespace ProjectC {
 
 			virtual void GetBytes(uint8_t* buffer, size_t count) override;
 			virtual void GetBytes(std::vector<uint8_t>& vec, size_t count) override;
+			virtual const uint8_t* GetBytes(size_t count) override;
+			virtual const uint8_t* GetBytes() override;
+
+			virtual void Advance(size_t count) override;
+			virtual void ResetPosition() override;
+			virtual void Reset(const uint8_t* buffer, uint32_t length) override;
 		};
 	}
 }

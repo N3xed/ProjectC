@@ -16,6 +16,9 @@ namespace ProjectC {
 			virtual size_t Available() = 0;
 			virtual size_t Position() = 0;
 			virtual void SetPosition(size_t pos) = 0;
+			virtual void Advance(size_t count) = 0;
+			virtual void ResetPosition() = 0;
+			virtual void Reset(const uint8_t* buffer, uint32_t length) = 0;
 
 			inline virtual uint8_t GetByte() = 0;
 			virtual uint16_t GetUShort() = 0;
@@ -34,6 +37,8 @@ namespace ProjectC {
 				GetBytes(result.data(), count);
 				return std::move(result);
 			}
+			virtual const uint8_t* GetBytes(size_t count) = 0;
+			virtual const uint8_t* GetBytes() = 0;
 		};
 	}
 }
