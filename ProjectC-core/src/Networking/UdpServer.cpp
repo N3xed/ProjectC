@@ -1,4 +1,5 @@
 #include "UdpServer.h"
+#include "UdpConnection.h"
 
 ProjectC::Networking::UdpServer::UdpServer(boost::asio::io_service& svc) : m_socket(svc)
 {}
@@ -51,11 +52,11 @@ void ProjectC::Networking::UdpServer::Close()
 
 void ProjectC::Networking::UdpServer::start_receive()
 {
-	std::shared_ptr<boost::asio::ip::udp::endpoint> endpoint = std::make_shared<boost::asio::ip::udp::endpoint>();
-	m_socket.async_receive_from(boost::asio::buffer(m_buffer.get(), MAX_PACKET_SIZE), *endpoint, boost::bind(&UdpServer::handler_receive, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred, endpoint));
+	auto con = std::make_shared<UdpConnection>();
+	m_socket.async_receive_from(boost::asio::buffer(m_buffer.get(), MAX_PACKET_SIZE), con->m_remoteEndpoint, boost::bind(&UdpServer::handler_receive, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred, con));
 }
 
-void ProjectC::Networking::UdpServer::handler_receive(const boost::system::error_code& errCode, size_t length, std::shared_ptr<boost::asio::ip::udp::endpoint> endpoint)
+void ProjectC::Networking::UdpServer::handler_receive(const boost::system::error_code& errCode, size_t length, std::shared_ptr<UdpConnection> con)
 {
 	if (!m_running)
 		return;
@@ -63,7 +64,9 @@ void ProjectC::Networking::UdpServer::handler_receive(const boost::system::error
 		m_errHandler(std::exception(errCode.message().c_str(), errCode.value()));
 	}
 	else {
-		m_handler(m_buffer.get(), length, *endpoint);
+		con->m_buffer.Length = length;
+		m_handler(std::move(con));
+		memset(m_buffer.get(), 0, length);
 	}
 	start_receive();
 }
