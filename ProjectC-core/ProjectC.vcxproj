@@ -180,9 +180,9 @@
     <ClInclude Include="src\Execution\RoutineManager.h" />
     <ClInclude Include="src\Interface\DelegateWrapper.h" />
     <ClInclude Include="src\main.cpp" />
-    <ClInclude Include="src\Networking\Container.hpp" />
+    <ClInclude Include="src\Networking\Container.h" />
     <ClInclude Include="src\Networking\ByteBuffer.h" />
-    <ClInclude Include="src\Networking\Data.h" />
+    <ClInclude Include="src\Networking\Packet.h" />
     <ClInclude Include="src\Networking\IByteBuffer.h" />
     <ClInclude Include="src\Networking\IConnection.h" />
     <ClInclude Include="src\Execution\Context.h" />

@@ -42,6 +42,7 @@ namespace ProjectC {
 		};
 
 		typedef Container<const uint8_t> Buffer;
-		typedef SharedContainer<const uint8_t> SharedBuffer;
+		typedef SharedContainer<uint8_t[]> SharedBuffer;
+		typedef UniqueContainer<uint8_t[]> UniqueBuffer;
 	}
 }

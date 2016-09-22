@@ -15,22 +15,23 @@ namespace ProjectC {
 			boost::asio::ip::tcp::socket m_socket;
 			boost::asio::ip::tcp::endpoint m_endpoint;
 
-			std::function<void(const uint8_t* data, uint32_t length)> m_receiveHandler{ nullptr };
+			ReceiveHandler m_receiveHandler{ nullptr };
 			std::function<void(std::exception& err)> m_errorHandler{ nullptr };
 			bool m_running{ false };
-			std::unique_ptr<uint8_t[]> m_buffer{ nullptr };
+			UniqueBuffer m_buffer;
+			std::weak_ptr<Packet> m_lastPacket;
 		public:
 			TcpConnection(boost::asio::io_service& io_service);
 			~TcpConnection();
 
-			void SetReceiveHandler(std::function<void(const uint8_t* data, uint32_t length)> handler) {
+			void SetReceiveHandler(ReceiveHandler handler) {
 				m_receiveHandler = handler;
 			}
 			boost::asio::ip::tcp::socket& GetSocket() {
 				return m_socket;
 			}
 
-			bool IsRunning() {
+			bool IsRunning() const {
 				return m_running;
 			}
 
@@ -53,6 +54,10 @@ namespace ProjectC {
 			virtual ProtocolType GetProtocol() const override {
 				return ProtocolType::TCP;
 			}
+
+			virtual Buffer GetBuffer() const override;
+			virtual Packet* GetLastPacket() override;
+			virtual void SetLastPacket(std::weak_ptr<Packet> packet) override;
 
 		private:
 			void connect_handler(const boost::system::error_code& err_code, std::function<void(bool, std::exception)> handler);

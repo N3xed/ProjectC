@@ -6,11 +6,14 @@
 
 namespace ProjectC {
 	namespace Networking {
+		class UdpConnection;
 		class UdpServer {
 		public:
+			friend class UdpConnection;
+
 			static const uint32_t MAX_PACKET_SIZE = 8192;
 
-			typedef std::function<void(const uint8_t* data, size_t length, const boost::asio::ip::udp::endpoint& endpoint)> ReadHandler;
+			typedef std::function<void(std::shared_ptr<UdpConnection>)> ReadHandler;
 			typedef std::function<void(const std::exception& exception)> ErrorHandler;
 		private:
 			boost::asio::ip::udp::socket m_socket;
@@ -47,7 +50,7 @@ namespace ProjectC {
 			}
 		private:
 			void start_receive();
-			void handler_receive(const boost::system::error_code& errCode, size_t length, std::shared_ptr<boost::asio::ip::udp::endpoint> endpoint);
+			void handler_receive(const boost::system::error_code& errCode, size_t length, std::shared_ptr<UdpConnection> con);
 		};
 	}
 }
