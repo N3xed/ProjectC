@@ -4,26 +4,26 @@
 namespace ProjectC {
 	namespace Interface {
 
-		template<typename Func, typename Arg, typename FnArg>
+		template<typename Function, typename DelegateArgument, typename FunctionArgument>
 		public ref class DelegateWrapper {
 		private:
-			Func m_function;
-			FnArg m_arg;
+			Function m_function;
+			FunctionArgument m_arg;
 		public:
-			DelegateWrapper(Func function, FnArg arg) : m_function(function), m_arg(arg)
+			DelegateWrapper(Function function, FunctionArgument arg) : m_function(function), m_arg(arg)
 			{}
 			DelegateWrapper()
 			{}
 
-			void SetFunction(Func fn) {
+			void SetFunction(Function fn) {
 				m_function = fn;
 			}
 
-			void SetArg(FnArg arg) {
+			void SetArg(FunctionArgument arg) {
 				m_arg = arg;
 			}
 
-			void Call(Arg arg) {
+			void Call(DelegateArgument arg) {
 				m_function(m_arg);
 			}
 		};

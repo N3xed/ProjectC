@@ -52,7 +52,7 @@ void ProjectC::Networking::UdpServer::Close()
 
 void ProjectC::Networking::UdpServer::start_receive()
 {
-	auto con = std::make_shared<UdpConnection>();
+	auto con = std::make_shared<UdpConnection>(*this);
 	m_socket.async_receive_from(boost::asio::buffer(m_buffer.get(), MAX_PACKET_SIZE), con->m_remoteEndpoint, boost::bind(&UdpServer::handler_receive, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred, con));
 }
 

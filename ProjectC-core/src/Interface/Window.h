@@ -15,11 +15,13 @@ namespace ProjectC {
 		public:
 			typedef void(*WindowHandler)(Window& window);
 		private:
+			typedef DelegateWrapper<WindowHandler, ProjectC_interface::MainWindow^, Window&> WindowHandlerDelegateWrapper;
+
 			gcroot<ProjectC_interface::MainWindow^> m_window;
 			gcroot<System::Windows::Application^> m_application;
-			gcroot<DelegateWrapper<WindowHandler, ProjectC_interface::MainWindow^, Window&>^> m_maximizeHandler{ gcnew DelegateWrapper<WindowHandler, ProjectC_interface::MainWindow^, Window&>(nullptr, *this) };
-			gcroot<DelegateWrapper<WindowHandler, ProjectC_interface::MainWindow^, Window&>^> m_shutdownHandler{ gcnew DelegateWrapper<WindowHandler, ProjectC_interface::MainWindow^, Window&>(nullptr, *this) };
-			gcroot<DelegateWrapper<WindowHandler, ProjectC_interface::MainWindow^, Window&>^> m_minimizeHandler{ gcnew DelegateWrapper<WindowHandler, ProjectC_interface::MainWindow^, Window&>(nullptr, *this) };
+			gcroot<WindowHandlerDelegateWrapper^> m_maximizeHandler{ gcnew WindowHandlerDelegateWrapper(nullptr, *this) };
+			gcroot<WindowHandlerDelegateWrapper^> m_shutdownHandler{ gcnew WindowHandlerDelegateWrapper(nullptr, *this) };
+			gcroot<WindowHandlerDelegateWrapper^> m_minimizeHandler{ gcnew WindowHandlerDelegateWrapper(nullptr, *this) };
 		public:
 
 			Window();
