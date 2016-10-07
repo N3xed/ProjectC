@@ -13,7 +13,7 @@ namespace ProjectC {
 
 		class Routine {
 		public:
-			typedef void(*RoutineFunction)(Context& context, IConnection& con);
+			typedef std::function<void(Context&, IConnection&)> RoutineFunction;
 		private:
 			uint32_t m_id;
 			RoutineFunction m_function;

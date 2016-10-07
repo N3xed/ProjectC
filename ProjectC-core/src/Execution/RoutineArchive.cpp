@@ -1,11 +1,11 @@
 #include "RoutineArchive.h"
-#include "RoutineManager.h"
+#include "ArchiveManager.h"
 
-ProjectC::Execution::RoutineArchive::RoutineArchive(std::string name)
+ProjectC::Execution::RoutineArchive::RoutineArchive(std::string path, uint16_t id) : m_id(id)
 {
-	m_dllHandle = LoadLibrary(name.c_str());
+	m_dllHandle = LoadLibrary(path.c_str());
 	if (m_dllHandle == NULL)
-		throw std::exception(("Library '" + name + "' not found.").c_str());
+		throw std::exception(("Library '" + path + "' not found.").c_str());
 
 	InitFunction initFunc = (InitFunction)GetProcAddress(m_dllHandle, "initialize");
 	if (initFunc == NULL) {
@@ -22,13 +22,20 @@ ProjectC::Execution::RoutineArchive::~RoutineArchive()
 	FreeLibrary(m_dllHandle);
 }
 
-void ProjectC::Execution::RoutineArchive::AddRoutine(std::string symbolName)
+void ProjectC::Execution::RoutineArchive::AddRoutine(Routine::RoutineFunction func, uint16_t id)
 {
-	Routine::RoutineFunction func = (Routine::RoutineFunction)GetProcAddress(m_dllHandle, symbolName.c_str());
-	if (func == NULL) {
-		throw std::exception((std::string("Function '") + symbolName + "' not found in library.").c_str());
+	if (!func) {
+		throw std::exception("Function object is not valid.");
 	}
-	m_routines.emplace_back(Routine(RoutineManager::GetNextId(), func, *this));
+	m_routines.emplace_back(Routine(id, func, *this));
+}
 
-	RoutineManager::AddRoutine(m_routines.back());
+std::vector<ProjectC::Execution::Routine>& ProjectC::Execution::RoutineArchive::GetRoutines()
+{
+	return m_routines;
+}
+
+uint16_t ProjectC::Execution::RoutineArchive::GetId() const
+{
+	return m_id;
 }

@@ -2,7 +2,7 @@
 #pragma unmanaged
 
 #include <stdint.h>
-#include "../Interface/Window.h"
+#include "../interface/Window.h"
 
 namespace ProjectC {
 	namespace Networking {

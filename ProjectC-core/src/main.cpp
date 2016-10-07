@@ -1,7 +1,5 @@
-#include "Interface/Window.h"
+#include <iostream>
 
-[System::STAThreadAttribute]
-int main() {
-	ProjectC::Interface::Window mainWindow{};
-	mainWindow.Run();
+int main(int argc, const char* argv[]) {
+
 }
