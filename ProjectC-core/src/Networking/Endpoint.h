@@ -1,10 +1,11 @@
 #pragma once
-#pragma unmanaged
 
-#include <boost/asio.hpp>
+#include <boost/asio/ip/tcp.hpp>
+#include <boost/asio/ip/udp.hpp>
 
 namespace ProjectC {
 	namespace Networking {
+		typedef boost::asio::ip::address IPAddress;
 
 		enum class ProtocolType: uint8_t {
 			NONE = 0,
@@ -21,10 +22,10 @@ namespace ProjectC {
 			Endpoint();
 			Endpoint(const boost::asio::ip::address& address, uint16_t port, ProtocolType protocol);
 
-			static Endpoint FromBoost(const boost::asio::ip::tcp::endpoint& endpoint) {
+			static Endpoint Create(const boost::asio::ip::tcp::endpoint& endpoint) {
 				return Endpoint(endpoint.address(), endpoint.port(), ProtocolType::TCP);
 			}
-			static Endpoint FromBoost(const boost::asio::ip::udp::endpoint& endpoint) {
+			static Endpoint Create(const boost::asio::ip::udp::endpoint& endpoint) {
 				return Endpoint(endpoint.address(), endpoint.port(), ProtocolType::UDP);
 			}
 

@@ -1,4 +1,5 @@
 #include "TcpServer.h"
+#include "ThreadedTcpConnection.h"
 
 ProjectC::Networking::TcpServer::TcpServer(const boost::asio::ip::tcp::endpoint& endpoint, boost::asio::io_service& io_svc) : m_acceptor(io_svc, endpoint)
 {}
@@ -6,10 +7,8 @@ ProjectC::Networking::TcpServer::TcpServer(const boost::asio::ip::tcp::endpoint&
 ProjectC::Networking::TcpServer::~TcpServer()
 {}
 
-void ProjectC::Networking::TcpServer::SetErrorHandler(std::function<void(const std::exception& err)> handler)
-{
-	m_errHandler = handler;
-}
+ProjectC::Networking::TcpServer::TcpServer(boost::asio::io_service& io_svc) : m_running(false), m_acceptor(io_svc)
+{}
 
 bool ProjectC::Networking::TcpServer::Bind(const boost::asio::ip::tcp::endpoint& endpoint)
 {
@@ -24,10 +23,12 @@ bool ProjectC::Networking::TcpServer::Bind(const boost::asio::ip::tcp::endpoint&
 	return true;
 }
 
-ProjectC::Networking::TcpServer::TcpServer(boost::asio::io_service& io_svc) : m_running(false), m_acceptor(io_svc)
-{}
+bool ProjectC::Networking::TcpServer::Bind(IPAddress address, uint16_t port)
+{
+	return Bind(boost::asio::ip::tcp::endpoint(address, port));
+}
 
-void ProjectC::Networking::TcpServer::Start(std::function<void(std::shared_ptr<TcpConnection>)> handler)
+void ProjectC::Networking::TcpServer::Start(ReceiveHandler handler)
 {
 	m_handler = handler;
 	m_running = true;
@@ -47,6 +48,8 @@ void ProjectC::Networking::TcpServer::Stop()
 
 void ProjectC::Networking::TcpServer::Close()
 {
+	if (!m_acceptor.is_open())
+		return;
 	try {
 		m_running = false;
 		m_acceptor.close();
@@ -58,16 +61,16 @@ void ProjectC::Networking::TcpServer::Close()
 
 void ProjectC::Networking::TcpServer::start_accept()
 {
-	std::shared_ptr<TcpConnection> con = std::make_shared<TcpConnection>(m_acceptor.get_io_service());
+	std::shared_ptr<ThreadedTcpConnection> con = std::make_shared<ThreadedTcpConnection>();
 	m_acceptor.async_accept(con->m_socket, con->m_endpoint, boost::bind(&TcpServer::handle_accept, this, std::move(con), boost::asio::placeholders::error));
 }
 
-void ProjectC::Networking::TcpServer::handle_accept(std::shared_ptr<TcpConnection> con, const boost::system::error_code& err_code)
+void ProjectC::Networking::TcpServer::handle_accept(std::shared_ptr<ThreadedTcpConnection> con, const boost::system::error_code& err_code)
 {
 	if (err_code) {
 		m_errHandler(std::exception(err_code.message().c_str(), err_code.value()));
 	} else {
-		m_handler(con);
+		m_handler(std::move(con));
 		if (m_running)
 			start_accept();
 	}

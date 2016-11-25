@@ -1,47 +1,50 @@
 #pragma once
 #pragma unmanaged
 
-#include <stdint.h>
+#include "IServer.h"
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
 #include <functional>
-#include "TcpConnection.h"
 
 namespace ProjectC {
 	namespace Networking {
-		class TcpServer {
+		class ThreadedTcpConnection;
+
+		class TcpServer : public IServer {
 		private:
 			boost::asio::ip::tcp::acceptor m_acceptor;
 			bool m_running{ false };
-			std::function<void(std::shared_ptr<TcpConnection>)> m_handler{ nullptr };
-			std::function<void(const std::exception& err)> m_errHandler{ nullptr };
+			ReceiveHandler m_handler{ nullptr };
+			ErrorHandler m_errHandler{ nullptr };
 		public:
 			TcpServer(const boost::asio::ip::tcp::endpoint& endpoint, boost::asio::io_service& io_svc);
 			TcpServer(boost::asio::io_service& io_svc);
 			~TcpServer();
 
-			void SetErrorHandler(std::function<void(const std::exception& err)> handler);
-
 			bool Bind(const boost::asio::ip::tcp::endpoint& endpoint);
-			void Start(std::function<void(std::shared_ptr<TcpConnection>)> handler);
-			void Stop();
-			void Close();
+			virtual bool Bind(IPAddress address, uint16_t port) override;
+			virtual void Start(ReceiveHandler handler) override;
+			virtual void Stop() override;
+			virtual void Close() override;
 
-			boost::asio::io_service& GetIOService() {
+			virtual boost::asio::io_service& GetIOService() override {
 				return m_acceptor.get_io_service();
+			}
+			virtual void SetErrorHandler(ErrorHandler handler) override {
+				m_errHandler = handler;
 			}
 			boost::asio::ip::tcp::acceptor& GetAcceptor() {
 				return m_acceptor;
 			}
-			boost::asio::ip::tcp::endpoint GetEndpoint() const {
-				return m_acceptor.local_endpoint();
+			virtual Endpoint GetEndpoint() const override {
+				return Endpoint::Create(m_acceptor.local_endpoint());
 			}
-			bool IsRunning() const {
+			virtual bool IsRunning() const override {
 				return m_running;
 			}
 		private:
 			void start_accept();
-			void handle_accept(std::shared_ptr<TcpConnection> con, const boost::system::error_code& err_code);
+			void handle_accept(std::shared_ptr<ThreadedTcpConnection> con, const boost::system::error_code& err_code);
 		};
 	}
 }

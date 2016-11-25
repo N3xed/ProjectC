@@ -1,0 +1,80 @@
+#pragma once
+
+#include <functional>
+
+namespace ProjectC {
+
+	template<typename T>
+	struct FunctionTraits;
+	template<typename R, typename... Args>
+	struct FunctionTraits<std::function<R(Args...)>> {
+		static constexpr size_t ArgsCount = sizeof...(Args);
+		typedef R ResultType;
+		template<size_t index>
+		struct Arg {
+			typedef typename std::tuple_element<index, std::tuple<Args...>>::type Type;
+		};
+	};
+
+	template<typename... Types>
+	struct TypeList {
+		template<size_t index>
+		struct Get {
+			typedef typename std::tuple_element<index, std::tuple<Types...>>::type Type;
+		};
+	};
+
+	template<typename Callable>
+	class InvocationList;
+
+	template<typename R, typename... Args>
+	class InvocationList<R(Args...)> {
+	private:
+		struct Node {
+			std::function<void(Args...)> Function;
+			Node* Next;
+			Node() : Function(nullptr), Next(nullptr) {	}
+			~Node() {
+				delete Next;
+			}
+			void operator()(Args... args) {
+				if(Function)
+					Function(std::forward<Args>(args)...);
+
+				if(Next != nullptr)
+					(*Next)(std::forward<Args>(args)...);
+			}
+		};
+		Node* m_front;
+		Node* m_back;
+	public:
+		InvocationList() : m_front(new Node()), m_back(m_front)
+		{}
+		~InvocationList() {
+			delete m_front;
+		}
+
+		void operator()(Args... args) {
+			(*m_front)(std::forward<Args>(args)...);
+		}
+
+		void Add(std::function<void(Args...)> func) {
+			m_back->Function = func;
+			m_back->Next = new Node();
+			m_back = m_back->Next;
+		}
+
+		bool Remove(std::function<void(Args...)> func) {
+			for (Node* last = m_front, iter = m_front; iter != nullptr; iter = iter->Next) {
+				if (iter->Function.target_type() == func.target_type()) {
+					last = iter->Next;
+					iter.Next = nullptr;
+					delete iter;
+					return true;
+				}
+				last = iter;
+			}
+		}
+	};
+
+}

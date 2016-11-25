@@ -10,6 +10,7 @@ ProjectC::Networking::UdpServer::UdpServer(const boost::asio::ip::udp::endpoint&
 bool ProjectC::Networking::UdpServer::Bind(const boost::asio::ip::udp::endpoint& endpoint)
 {
 	try {
+		m_socket.open(endpoint.protocol());
 		m_socket.bind(endpoint);
 	}
 	catch (const boost::system::error_code& errCode) {
@@ -19,7 +20,12 @@ bool ProjectC::Networking::UdpServer::Bind(const boost::asio::ip::udp::endpoint&
 	return true;
 }
 
-void ProjectC::Networking::UdpServer::Start(ReadHandler handler)
+bool ProjectC::Networking::UdpServer::Bind(IPAddress address, uint16_t port)
+{
+	return Bind(boost::asio::ip::udp::endpoint(address, port));
+}
+
+void ProjectC::Networking::UdpServer::Start(ReceiveHandler handler)
 {
 	m_running = true;
 	m_handler = handler;
@@ -31,6 +37,9 @@ void ProjectC::Networking::UdpServer::Stop()
 {
 	try {
 		m_running = false;
+		auto endpoint = m_socket.local_endpoint();
+		Close();
+		Bind(endpoint);
 		m_buffer.reset();
 	} 
 	catch (const boost::system::error_code& errCode) {
@@ -40,9 +49,12 @@ void ProjectC::Networking::UdpServer::Stop()
 
 void ProjectC::Networking::UdpServer::Close()
 {
+	if (!m_socket.is_open())
+		return;
 	if (m_running)
 		Stop();
 	try {
+		m_socket.shutdown(boost::asio::socket_base::shutdown_both);
 		m_socket.close();
 	}
 	catch (const boost::system::error_code& errCode) {
@@ -61,13 +73,14 @@ void ProjectC::Networking::UdpServer::handler_receive(const boost::system::error
 	if (!m_running)
 		return;
 	if (errCode) {
+		m_running = false;
 		m_errHandler(std::exception(errCode.message().c_str(), errCode.value()));
 	}
 	else {
 		con->m_buffer.Length = length;
 		m_handler(std::move(con));
 		memset(m_buffer.get(), 0, length);
+		start_receive();
 	}
-	start_receive();
 }
 

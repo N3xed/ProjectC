@@ -1,5 +1,5 @@
 #pragma once
-#pragma unmanaged
+#include "IServer.h"
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
 
@@ -7,19 +7,16 @@
 namespace ProjectC {
 	namespace Networking {
 		class UdpConnection;
-		class UdpServer {
+		class UdpServer : public IServer {
 		public:
 			friend class UdpConnection;
 
 			static const uint32_t MAX_PACKET_SIZE = 8192;
-
-			typedef std::function<void(std::shared_ptr<UdpConnection>)> ReadHandler;
-			typedef std::function<void(const std::exception& exception)> ErrorHandler;
 		private:
 			boost::asio::ip::udp::socket m_socket;
 
 			bool m_running{ false };
-			ReadHandler m_handler{ nullptr };
+			ReceiveHandler m_handler{ nullptr };
 			ErrorHandler m_errHandler{ nullptr };
 
 			std::unique_ptr<uint8_t[]> m_buffer{ nullptr };
@@ -32,20 +29,21 @@ namespace ProjectC {
 			}
 
 			bool Bind(const boost::asio::ip::udp::endpoint& endpoint);
-			void Start(ReadHandler handler);
-			void Stop();
-			void Close();
+			virtual bool Bind(IPAddress address, uint16_t port) override;
+			virtual void Start(ReceiveHandler handler) override;
+			virtual void Stop() override;
+			virtual void Close() override;
 
-			boost::asio::io_service& GetIOService() {
+			virtual boost::asio::io_service& GetIOService() override {
 				return m_socket.get_io_service();
 			}
 			boost::asio::ip::udp::socket& GetSocket() {
 				return m_socket;
 			}
-			boost::asio::ip::udp::endpoint GetEndpoint() const {
-				return m_socket.local_endpoint();
+			virtual Endpoint GetEndpoint() const override {
+				return Endpoint::Create(m_socket.local_endpoint());
 			}
-			bool IsRunning() const {
+			virtual bool IsRunning() const override {
 				return m_running;
 			}
 		private:

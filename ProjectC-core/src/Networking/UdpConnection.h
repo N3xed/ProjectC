@@ -7,6 +7,9 @@
 namespace ProjectC {
 	namespace Networking {
 		class UdpConnection : public IConnection {
+		public:
+			typedef std::function<void()> CloseHandler;
+			
 		private:
 			friend class UdpServer;
 
@@ -14,20 +17,21 @@ namespace ProjectC {
 			boost::asio::ip::udp::endpoint m_remoteEndpoint;
 			Buffer m_buffer;
 			std::weak_ptr<Packet> m_lastPacket;
+			ErrorHandler m_errorHandler{ nullptr };
+			CloseHandler m_closeHandler{ nullptr };
 		public:
 			UdpConnection(UdpServer& server) : m_server(server), m_buffer(0, server.m_buffer.get())
 			{}
+			UdpConnection(UdpServer& server, boost::asio::ip::udp::endpoint remoteEndpoint) : m_server(server), m_buffer(0, server.m_buffer.get()), m_remoteEndpoint(remoteEndpoint)
+			{}
 
-			virtual Endpoint GetLocalEndpoint() const override
-			{
-				return Endpoint::FromBoost(m_server.GetEndpoint());
+			virtual Endpoint GetLocalEndpoint() const override {
+				return m_server.GetEndpoint();
 			}
-			virtual Endpoint GetRemoteEndpoint() const override
-			{
-				return Endpoint::FromBoost(m_remoteEndpoint);
+			virtual Endpoint GetRemoteEndpoint() const override {
+				return Endpoint::Create(m_remoteEndpoint);
 			}
-			virtual ProtocolType GetProtocol() const override
-			{
+			virtual ProtocolType GetProtocolType() const override {
 				return ProtocolType::UDP;
 			}
 
@@ -35,32 +39,59 @@ namespace ProjectC {
 				return m_server;
 			}
 
-			virtual void Send(const uint8_t* buffer, size_t length) override
-			{
-				m_server.GetSocket().send_to(boost::asio::buffer(buffer, length), m_remoteEndpoint);
+			virtual bool Send(const uint8_t* buffer, size_t length) override {
+				try {
+					m_server.GetSocket().send_to(boost::asio::buffer(buffer, length), m_remoteEndpoint);
+				}
+				catch (boost::system::error_code& errCode) {
+					m_errorHandler(*this, std::exception(errCode.message().c_str(), errCode.value()));
+					return false;
+				}
+				return true;
 			}
 
-			virtual void SendAsync(const uint8_t* buffer, size_t length, SendHandler handler = SendHandler(nullptr)) override
-			{
+			virtual void SendAsync(const uint8_t* buffer, size_t length, SendHandler handler = SendHandler(nullptr)) override {
 				m_server.GetSocket().async_send_to(boost::asio::buffer(buffer, length), m_remoteEndpoint, [&handler](const boost::system::error_code& errCode, size_t bytesTransferred) -> void{
 					handler(errCode.value() == 0, std::exception(errCode.message().c_str(), errCode.value()));
 				});
 			}
 
-			virtual Buffer GetBuffer() const override
-			{
+			virtual Buffer GetBuffer() const override {
 				return m_buffer;
 			}
 
-			virtual Packet* GetLastPacket() override
-			{
+			virtual Packet* GetLastPacket() override {
 				return m_lastPacket.lock().get();
 			}
 
-			virtual void SetLastPacket(std::weak_ptr<Packet> packet) override
-			{
+			virtual void SetLastPacket(std::weak_ptr<Packet> packet) override {
 				m_lastPacket.swap(packet);
 			}
+			
+			virtual bool IsOpen() const noexcept override {
+				return true;
+			}
+
+			virtual void SetErrorHandler(ErrorHandler handler) override {
+				m_errorHandler = handler;
+			}
+
+			virtual void Close() override
+			{
+				assert(m_closeHandler);
+				m_closeHandler();
+			}
+
+			void SetCloseHandler(CloseHandler handler) {
+				m_closeHandler = handler;
+			}
+
+			virtual void SetDisconnectedHandler(DisconnectedHandler handler) override
+			{
+				assert(false);
+				throw std::logic_error("Operation not supported.");
+			}
+
 		};
 	}
 }

@@ -16,17 +16,16 @@ namespace ProjectC {
 			boost::asio::ip::tcp::endpoint m_endpoint;
 
 			ReceiveHandler m_receiveHandler{ nullptr };
-			std::function<void(std::exception& err)> m_errorHandler{ nullptr };
+			ErrorHandler m_errorHandler{ nullptr };
+			DisconnectedHandler m_disconnectHandler{ nullptr };
 			bool m_running{ false };
+			bool m_closed{ false };
 			UniqueBuffer m_buffer;
 			std::weak_ptr<Packet> m_lastPacket;
 		public:
 			TcpConnection(boost::asio::io_service& io_service);
 			~TcpConnection();
 
-			void SetReceiveHandler(ReceiveHandler handler) {
-				m_receiveHandler = handler;
-			}
 			boost::asio::ip::tcp::socket& GetSocket() {
 				return m_socket;
 			}
@@ -35,23 +34,23 @@ namespace ProjectC {
 				return m_running;
 			}
 
-			void Start();
-			void Stop();
+			virtual void Start();
+			virtual void Stop();
 
 			bool Connect(const boost::asio::ip::tcp::endpoint& endpoint);
-			void AsyncConnect(const boost::asio::ip::tcp::endpoint& endpoint, std::function<void(bool, std::exception)> handler);
-			void Close();
+			void AsyncConnect(const boost::asio::ip::tcp::endpoint& endpoint, ConnectHandler handler);
+			virtual void Close() override;
 
-			virtual void Send(const uint8_t* buffer, size_t length) override;
+			virtual bool Send(const uint8_t* buffer, size_t length) override;
 			virtual void SendAsync(const uint8_t* buffer, size_t length, SendHandler handler = SendHandler(nullptr)) override;
 
 			virtual Endpoint GetLocalEndpoint() const override {
-				return Endpoint::FromBoost(m_socket.local_endpoint());
+				return Endpoint::Create(m_socket.local_endpoint());
 			}
 			virtual Endpoint GetRemoteEndpoint() const override {
-				return Endpoint::FromBoost(m_socket.remote_endpoint());
+				return Endpoint::Create(m_socket.remote_endpoint());
 			}
-			virtual ProtocolType GetProtocol() const override {
+			virtual ProtocolType GetProtocolType() const override {
 				return ProtocolType::TCP;
 			}
 
@@ -59,8 +58,22 @@ namespace ProjectC {
 			virtual Packet* GetLastPacket() override;
 			virtual void SetLastPacket(std::weak_ptr<Packet> packet) override;
 
+			virtual bool IsOpen() const noexcept override {
+				return m_closed;
+			}
+
+			void SetReceiveHandler(ReceiveHandler handler) {
+				m_receiveHandler = handler;
+			}
+			virtual void SetErrorHandler(ErrorHandler handler) override {
+				m_errorHandler = handler;
+			}
+			virtual void SetDisconnectedHandler(DisconnectedHandler handler) override {
+				m_disconnectHandler = handler;
+			}
+			
 		private:
-			void connect_handler(const boost::system::error_code& err_code, std::function<void(bool, std::exception)> handler);
+			void connect_handler(const boost::system::error_code& err_code, ConnectHandler handler);
 			void start_receive();
 			void handle_receive(const boost::system::error_code& err_code, size_t length);
 		};
