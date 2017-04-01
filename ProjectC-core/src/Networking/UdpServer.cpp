@@ -77,7 +77,7 @@ void ProjectC::Networking::UdpServer::handler_receive(const boost::system::error
 		m_errHandler(std::exception(errCode.message().c_str(), errCode.value()));
 	}
 	else {
-		con->m_buffer.Length = length;
+		con->m_bufferSize = length;
 		m_handler(std::move(con));
 		memset(m_buffer.get(), 0, length);
 		start_receive();

@@ -1,40 +1,35 @@
 #include "Config.h"
 
-ProjectC::Config::Config() : m_tree(), m_currentTree(&m_tree)
+ProjectC::Config::Config() : m_tree()
 {
 }
 
-ProjectC::Config::Config(const std::string& jsonText) : m_tree(), m_currentTree(&m_tree)
+ProjectC::Config::Config(const std::string& jsonText) : m_tree()
 {
 	std::stringstream ss{ jsonText };
 	boost::property_tree::json_parser::read_json(ss, m_tree);
 }
 
-ProjectC::Config::Config(const UnicodeString& jsonText) : m_tree(), m_currentTree(&m_tree)
-{
-	std::stringstream ss{ StringUtils::ToUTF8(jsonText) };
-	boost::property_tree::json_parser::read_json(ss, m_tree);
+ProjectC::Config::Config(boost::property_tree::ptree tree) : m_tree(tree)
+{ 
 }
 
-ProjectC::Config::Config(boost::property_tree::ptree tree) : m_tree(tree), m_currentTree(&m_tree)
-{ }
-
-void ProjectC::Config::Scope(const std::string& path)
+ProjectC::ScopedConfig::ScopedConfig(IConfig& conf, const std::string& str, bool shouldCreate) : m_isValid(true)
 {
-	m_currentTree = &m_tree.get_child(path);
+	auto optTree = conf.GetTree().get_child_optional(str);
+	if (optTree) {
+		m_tree = optTree.get_ptr();
+	}
+	else if(shouldCreate) {
+		m_tree = &conf.GetTree().put_child(str, boost::property_tree::ptree{});
+	}
+	else {
+		m_isValid = false;
+	}
 }
 
-void ProjectC::Config::Unscope()
-{
-	m_currentTree = &m_tree;
-}
+ProjectC::ScopedConfig::ScopedConfig() : m_tree(nullptr), m_isValid(false)
+{}
 
-void ProjectC::Config::Scope(const UnicodeString& path)
-{
-	m_currentTree = &m_tree.get_child(StringUtils::ToUTF8(path));
-}
-
-ProjectC::Config ProjectC::Config::GetDefault()
-{
-	return Config();
-}
+ProjectC::ScopedConfig::ScopedConfig(boost::property_tree::ptree& tree) : m_tree(&tree), m_isValid(true)
+{}

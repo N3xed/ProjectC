@@ -1,18 +1,19 @@
 #pragma once
 
 #include <stdint.h>
-#include "IByteBuffer.h"
+#include "../Serialization/IByteBuffer.h"
 #include <vector>
-#include "Container.h"
 #include <numeric>
 
 namespace ProjectC {
 	namespace Networking {
+		using namespace Serialization;
 		
 		class PacketHeader {
 		public:
 			uint16_t ContextId; // 2 bytes
-			Buffer AddionalInformation; // 2 bytes + data
+			const uint8_t* AdditionalInfoBuf;
+			uint16_t AdditionalInfoLength;
 			uint16_t RoutineId; // 2 bytes
 			uint32_t DataLength; // 4 bytes
 
@@ -23,29 +24,35 @@ namespace ProjectC {
 			{}
 
 			uint32_t GetSize() const {
-				return AddionalInformation.Length + 10;
+				return static_cast<uint32_t>(AdditionalInfoLength) + 10;
 			}
 
 			void Serialize(IByteBuffer& buffer) const {
-				buffer.WriteUShort(ContextId);
-				buffer.WriteUShort(static_cast<uint16_t>(AddionalInformation.Length));
-				buffer.WriteBytes(AddionalInformation.DataPtr, AddionalInformation.Length);
-				buffer.WriteUShort(RoutineId);
-				buffer.WriteUInt(DataLength);
+				buffer.Write(ContextId);
+				buffer.Write(AdditionalInfoLength);
+				buffer.WriteAll(AdditionalInfoBuf, AdditionalInfoLength);
+				buffer.Write(RoutineId);
+				buffer.Write(DataLength);
 			}
 
 			void Parse(IByteBuffer& buffer) {
-				ContextId = buffer.GetUInt();
-				AddionalInformation.Length = (size_t)buffer.GetUShort();
-				AddionalInformation.DataPtr = buffer.GetBytes(AddionalInformation.Length);
-				RoutineId = buffer.GetUInt();
-				DataLength = buffer.GetUInt();
+				ContextId = buffer.Read<uint16_t>();
+				AdditionalInfoLength = buffer.Read<uint16_t>();
+				AdditionalInfoBuf = buffer.GetCurrentPtr();
+				buffer.Advance(AdditionalInfoLength);
+				RoutineId = buffer.Read<uint16_t>();
+				DataLength = buffer.Read<uint32_t>();
 			}
 		};
 
 		class Packet {
 		private:
-			uint32_t m_dataLength{ 0 };
+			size_t m_dataLength{ 0 };
+
+			struct Buffer {
+				const uint8_t* buf;
+				size_t length;
+			};
 		public:
 			PacketHeader Header;
 			std::vector<Buffer> Data;
@@ -57,8 +64,10 @@ namespace ProjectC {
 					return;
 				}
 				size_t available = buffer.Available();
-				if (available > 0)
-					AddData(available, buffer.GetBytes());
+				if (available > 0) {
+					AddData(available, buffer.GetCurrentPtr());
+					buffer.SetPosition(buffer.Size());
+				}
 			}
 
 			uint32_t GetSize() const {
@@ -69,7 +78,7 @@ namespace ProjectC {
 				assert(m_dataLength == Header.DataLength);
 				Header.Serialize(buffer);
 				for (auto& e : Data) {
-					buffer.WriteBytes(e.DataPtr, e.Length);
+					buffer.WriteAll(e.buf, e.length);
 				}
 			}
 
@@ -78,7 +87,7 @@ namespace ProjectC {
 			}
 
 			void AddData(size_t length, const uint8_t* buffer) {
-				Data.emplace_back(length, buffer);
+				Data.emplace_back(Buffer{ buffer, length });
 				m_dataLength += length;
 			}
 		};

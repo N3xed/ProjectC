@@ -25,15 +25,21 @@ namespace ProjectC {
 	};
 
 	template<typename Callable>
-	class InvocationList;
+	class InvocationList {};
 
+	/// <summary>
+	/// A list that can chain event listeners.
+	/// </summary>
 	template<typename R, typename... Args>
 	class InvocationList<R(Args...)> {
+	public:
+		typedef std::function<void(Args...)> FunctionType;
+
 	private:
 		struct Node {
-			std::function<void(Args...)> Function;
+			FunctionType Function;
 			Node* Next;
-			Node() : Function(nullptr), Next(nullptr) {	}
+			Node() : Function(), Next(nullptr) {	}
 			~Node() {
 				delete Next;
 			}
@@ -48,6 +54,7 @@ namespace ProjectC {
 		Node* m_front;
 		Node* m_back;
 	public:
+
 		InvocationList() : m_front(new Node()), m_back(m_front)
 		{}
 		~InvocationList() {
@@ -58,13 +65,18 @@ namespace ProjectC {
 			(*m_front)(std::forward<Args>(args)...);
 		}
 
-		void Add(std::function<void(Args...)> func) {
+		void Add(FunctionType func) {
 			m_back->Function = func;
 			m_back->Next = new Node();
 			m_back = m_back->Next;
 		}
 
-		bool Remove(std::function<void(Args...)> func) {
+		/// <summary>
+		/// Removes the specified function.
+		/// </summary>
+		/// <param name="func">The function.</param>
+		/// <returns><c>true</c> if the function was removed, <c>false</c> if it wasn't.</returns>
+		bool Remove(FunctionType func) {
 			for (Node* last = m_front, iter = m_front; iter != nullptr; iter = iter->Next) {
 				if (iter->Function.target_type() == func.target_type()) {
 					last = iter->Next;

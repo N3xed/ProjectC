@@ -4,7 +4,7 @@
 #include <tuple>
 #include <map>
 #include <memory>
-#include "../Utils.h"
+#include "../Utils/Utils.h"
 
 namespace ProjectC {
 	namespace Modules {
@@ -31,10 +31,7 @@ namespace ProjectC {
 			size_t RoutineCount() const {
 				return m_routines.size();
 			}
-			bool AddRoutine(int16_t id, IModule::Routine routine) {
-				auto result = m_routines.emplace(id, routine);
-				return result.second;
-			}
+			bool AddRoutine(int16_t id, IModule::Routine routine);
 		};
 
 		class ModuleManager {

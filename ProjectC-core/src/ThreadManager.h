@@ -48,7 +48,7 @@ namespace ProjectC {
 
 		template<ThreadType id>
 		static boost::thread_group& GetGroup() {
-			assert(static_cast<uint32_t>(id) <= 3);
+			static_assert(static_cast<uint32_t>(id) <= 3, "No such type.");
 			static boost::thread_group group{};
 			return group;
 		}

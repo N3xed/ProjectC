@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Endpoint.h"
-#include "Container.h"
 #include "Packet.h"
 
 namespace ProjectC {
@@ -29,7 +28,7 @@ namespace ProjectC {
 			virtual void SetErrorHandler(ErrorHandler handler) = 0;
 			virtual void SetDisconnectedHandler(DisconnectedHandler handler) = 0;
 
-			virtual Buffer GetBuffer() const = 0;
+			virtual std::tuple<const uint8_t*, size_t> GetBuffer() const = 0;
 			virtual Packet* GetLastPacket() = 0;
 			virtual void SetLastPacket(std::weak_ptr<Packet> packet) = 0;
 

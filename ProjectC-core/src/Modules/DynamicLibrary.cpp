@@ -1,32 +1,21 @@
 #include "DynamicLibrary.h"
 
 
-
-ProjectC::Modules::DynamicLibrary::DynamicLibrary(const std::string& filePath)
+ProjectC::Modules::DynamicLibrary::DynamicLibrary(const UniString& filePath)
 {
-	const wchar_t* wideString = UnicodeString::fromUTF8(filePath).getTerminatedBuffer();
+	std::wstring wstr = filePath.ToWString();
+
+	const wchar_t* str = wstr.c_str();
 	wchar_t fname[_MAX_FNAME];
 	wchar_t extension[_MAX_EXT];
-	_wsplitpath(wideString, NULL, NULL, fname, extension);
-	m_name = StringUtils::ToUTF8(UnicodeString(fname) + UnicodeString(extension));
+	_wsplitpath(str, NULL, NULL, fname, extension);
+	m_name = std::string();
 
-	m_libraryHandle = LoadLibraryW(wideString);
+	m_libraryHandle = LoadLibraryW(str);
 	if (m_libraryHandle == NULL)
-		throw std::exception(("Could not load library: " + filePath).c_str(), GetLastError());
+		throw std::exception(("Could not load library: " + filePath.ToString()).c_str(), GetLastError());
 }
 
-ProjectC::Modules::DynamicLibrary::DynamicLibrary(UnicodeString& filePath)
-{
-	const wchar_t* wideString = filePath.getTerminatedBuffer();
-	wchar_t fname[_MAX_FNAME];
-	wchar_t extension[_MAX_EXT];
-	_wsplitpath(wideString, NULL, NULL, fname, extension);
-	m_name = StringUtils::ToUTF8(UnicodeString(fname) + UnicodeString(extension));
-
-	m_libraryHandle = LoadLibraryW(wideString);
-	if (m_libraryHandle == NULL)
-		throw std::exception(StringUtils::ToUTF8("Could not load library: " + filePath).c_str(), GetLastError());
-}
 
 ProjectC::Modules::DynamicLibrary::DynamicLibrary(DynamicLibrary&& obj)
 {

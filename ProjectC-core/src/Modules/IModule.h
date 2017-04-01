@@ -1,9 +1,11 @@
 #pragma once
 
-#include "../String.h"
+#include "../Utils/String.h"
+
 #include <stdint.h>
 #include <functional>
 #include <vector>
+#include <memory>
 
 namespace ProjectC {
 
@@ -37,8 +39,8 @@ namespace ProjectC {
 
 			virtual void RegisterRoutines(RoutineRegisterer registerer) = 0;
 
-			virtual const std::vector<Interface::IGUIModule>* GetGUIModules() = 0;
-			virtual Interface::IGUIModule* GetOptionsModule() = 0;
+			virtual std::vector<std::shared_ptr<Interface::IGUIModule>> GetGUIModules() = 0;
+			virtual std::shared_ptr<Interface::IGUIModule> GetOptionsModule() = 0;
 		};
 	}
 }

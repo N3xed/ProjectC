@@ -1,20 +1,17 @@
 #pragma once
 
 #include "../Modules/IModule.h"
-#include "NavButton.h"
-#include "wx/panel.h"
 #include "IGUIModule.h"
 
 namespace ProjectC::Interface {
 	class NavigationElement {
 	public:
 		Modules::IModule* Module;
-		IGUIModule* GUIModule;
-		wxPanel* Panel;
-		NavButton* NavigationButton;
+		std::shared_ptr<IGUIModule> GUIModule;
+		int32_t GUIModuleId;
 
-		NavigationElement(Modules::IModule* module, IGUIModule* guiModule, wxPanel* panel, NavButton* button = nullptr) :
-			Module(module), GUIModule(guiModule), Panel(panel), NavigationButton(button)
+		NavigationElement(Modules::IModule* module, std::shared_ptr<IGUIModule> guiModule, int32_t guiModuleId) :
+			Module(module), GUIModule(guiModule), GUIModuleId(guiModuleId)
 		{}
 	};
 }

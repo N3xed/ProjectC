@@ -14,7 +14,7 @@ namespace ProjectC::Modules {
 		ExecutionContext& Create(const IModule::UID_t& uid);
 		ExecutionContext& Create(ModuleInfo& info);
 
-		ExecutionContext& GetContext(uint16_t id);
+		ExecutionContext* GetContext(uint16_t id);
 		ExecutionContext* GetContext(const IModule::UID_t& uid);
 		ExecutionContext& GetContext(IModule& module);
 		ExecutionContext& GetContext(ModuleInfo& info);

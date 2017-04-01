@@ -31,6 +31,10 @@ namespace ProjectC::Interface {
 			return m_strings[index];
 		}
 
+		const std::string& operator[](StringKeys key) const {
+			return m_strings[static_cast<size_t>(key)];
+		}
+
 		const std::string& GetString(uint32_t index) const {
 			return m_strings.at(index);
 		}

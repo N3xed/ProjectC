@@ -144,7 +144,6 @@ namespace ProjectC::Networking {
 		void StopThreadAsync(Callback callback);
 
 	protected:
-
 		bool TryStartUdp(const IPAddress& addr, uint16_t port);
 		bool TryStartTcp(const IPAddress& addr, uint16_t port);
 

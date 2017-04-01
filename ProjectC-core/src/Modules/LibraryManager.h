@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../String.h"
+#include "../UniString.h"
 #include "DynamicLibrary.h"
 #include <forward_list>
 
@@ -13,10 +13,8 @@ namespace ProjectC {
 		public:
 
 			DynamicLibrary& AddLibrary(DynamicLibrary&& library);
-			DynamicLibrary& AddLibrary(const std::string& path);
-			DynamicLibrary& AddLibrary(UnicodeString& path);
+			DynamicLibrary& AddLibrary(const UniString& path);
 
-			bool RemoveLibrary(const UnicodeString& name);
 			bool RemoveLibrary(const std::string& name);
 			bool RemoveLibrary(const DynamicLibrary& library);
 

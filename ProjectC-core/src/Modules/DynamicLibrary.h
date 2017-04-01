@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../String.h"
+#include "../UniString.h"
 #include <Windows.h>
 //#include <wx/msw/winundef.h>
 #include <cassert>
@@ -16,8 +16,7 @@ namespace ProjectC {
 			DynamicLibrary(const DynamicLibrary& obj) = delete;
 			DynamicLibrary(DynamicLibrary&& obj);
 
-			DynamicLibrary(const std::string& filePath);
-			DynamicLibrary(UnicodeString& filePath);
+			DynamicLibrary(const UniString& filePath);
 			~DynamicLibrary();
 
 			void* GetFunction(std::string name) const noexcept;

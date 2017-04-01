@@ -33,7 +33,7 @@ boost::optional<std::tuple<uint16_t, ProjectC::Modules::IModule::Routine>>& Proj
 
 void ProjectC::Modules::ExecutionContext::RemoveData(const std::string& key)
 {
-	std::lock_guard<std::mutex> lock{ m_userDataMutex };
+	std::lock_guard<std::mutex> lock{ m_mutex };
 	auto it = m_userData.find(key);
 	delete it->second;
 	m_userData.erase(it);

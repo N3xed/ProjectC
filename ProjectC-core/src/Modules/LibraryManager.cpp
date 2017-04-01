@@ -6,30 +6,10 @@ ProjectC::Modules::DynamicLibrary& ProjectC::Modules::LibraryManager::AddLibrary
 	return m_libraries.front();
 }
 
-ProjectC::Modules::DynamicLibrary& ProjectC::Modules::LibraryManager::AddLibrary(const std::string& path)
+ProjectC::Modules::DynamicLibrary& ProjectC::Modules::LibraryManager::AddLibrary(const UniString& path)
 {
 	m_libraries.push_front(DynamicLibrary(path));
 	return m_libraries.front();
-}
-
-ProjectC::Modules::DynamicLibrary& ProjectC::Modules::LibraryManager::AddLibrary(UnicodeString& path)
-{
-	m_libraries.push_front(DynamicLibrary(path));
-	return m_libraries.front();
-}
-
-bool ProjectC::Modules::LibraryManager::RemoveLibrary(const UnicodeString& name)
-{
-	bool success = false;
-	std::string utf8String = StringUtils::ToUTF8(name);
-	m_libraries.remove_if([&utf8String, &success](DynamicLibrary& e) {
-		if (e.GetName() == utf8String) {
-			success = true;
-			return true;
-		}
-		return false;
-	});
-	return success;
 }
 
 bool ProjectC::Modules::LibraryManager::RemoveLibrary(const std::string& name)

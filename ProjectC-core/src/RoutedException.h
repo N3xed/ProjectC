@@ -1,5 +1,6 @@
 #pragma once
 #include <exception>
+#include "String.h"
 
 namespace ProjectC {
 	class RoutedException : public std::exception {

@@ -6,10 +6,10 @@
 #include "../IHandle.h"
 #include <map>
 #include <boost/optional.hpp>
-#include "../Utils.h"
+#include "../Utils/Utils.h"
 #include "../IDisposable.h"
 #include "ModuleManager.h"
-#include "../Application.h"
+#include "../App.h"
 
 
 namespace ProjectC::Networking {
@@ -39,17 +39,14 @@ namespace ProjectC::Modules {
 	private:
 		std::map<std::string, IHandle*> m_userData;
 		const ModuleInfo& m_moduleInfo;
-		std::mutex m_userDataMutex;
+		std::mutex m_mutex;
 		uint16_t m_id;
 	public:
 		ExecutionContext(const ModuleInfo& module, uint16_t id);
 		~ExecutionContext();
 
-		IApplication& GetApplication() const {
-			return GetApplication();
-		}
 		ModuleManager& GetModuleManager() const {
-			return GetApplication().GetModuleManager();
+			return App::ModuleMgr();
 		}
 		uint16_t GetId() const noexcept {
 			return m_id;
@@ -59,7 +56,7 @@ namespace ProjectC::Modules {
 		void ExecuteRoutine(Networking::IConnection& con);
 
 		template<typename T> void AddDataUnmanaged(std::string key, T* data) {
-			std::lock_guard<std::mutex> lock{ m_userDataMutex };
+			std::lock_guard<std::mutex> lock{ m_mutex };
 			m_userData.emplace(key, new IHandleWrapper<false, T>(data));
 		}
 		template<typename T> void AddDataUnmanaged(std::string key, T& data) {
@@ -67,7 +64,7 @@ namespace ProjectC::Modules {
 		}
 
 		template<typename T> void AddDataManaged(std::string key, T* data){
-			std::lock_guard<std::mutex> lock{ m_userDataMutex };
+			std::lock_guard<std::mutex> lock{ m_mutex };
 			m_userData.emplace(key, new IHandleWrapper<true, T>(data));
 		}
 		template<typename T>void AddDataManaged(std::string key, const T& data) {
@@ -83,7 +80,7 @@ namespace ProjectC::Modules {
 		T* PopDataManaged(const std::string& key) {
 			IHandleWrapper<true, T>* obj;
 			{
-				std::lock_guard<std::mutex> lock{ m_userDataMutex };
+				std::lock_guard<std::mutex> lock{ m_mutex };
 				auto it = m_userData.find(key);
 				obj = static_cast<IHandleWrapper<true, T>*>(it->second);
 				m_userData.erase(it);
@@ -97,7 +94,7 @@ namespace ProjectC::Modules {
 		T* PopDataUnmanaged(const std::string& key) {
 			IHandleWrapper<false, T>* obj;
 			{
-				std::lock_guard<std::mutex> lock{ m_userDataMutex };
+				std::lock_guard<std::mutex> lock{ m_mutex };
 				auto it = m_userData.find(key);
 				obj = static_cast<IHandleWrapper<false, T>*>(it->second);
 				m_userData.erase(it);
@@ -109,7 +106,7 @@ namespace ProjectC::Modules {
 		void RemoveData(const std::string& key);
 		template<bool managed, typename T>
 		T* GetData(const std::string& key) {
-			std::lock_guard<std::mutex> lock{ m_userDataMutex };
+			std::lock_guard<std::mutex> lock{ m_mutex };
 			return static_cast<IHandleWrapper<managed, T>*>(m_userData.at(key))->Pointer;
 		}
 		const IModule& GetModule() const noexcept {

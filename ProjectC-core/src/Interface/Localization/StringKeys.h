@@ -2,11 +2,12 @@
 #include <cstdint>
 
 namespace ProjectC::Interface {
-	const enum StringKeys : uint32_t {
+	const enum class StringKeys : size_t {
 		//Status messages
 		READY_MSG,
 		INITIALIZING_MSG,
 		SHUTTING_DOWN_MSG,
+		LOADING_MSG,
 
 		//Widget texts
 		APP_TITLE,
@@ -14,6 +15,8 @@ namespace ProjectC::Interface {
 
 		HOME_TEXT,
 		OPTIONS_TEXT,
-		INFO_TEXT
+		INFO_TEXT,
+		PEERS_TEXT,
+		ADD_PEER_TEXT
 	};
 }

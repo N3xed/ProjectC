@@ -97,7 +97,7 @@ const ProjectC::Modules::ModuleInfo& ProjectC::Modules::ModuleManager::AddModule
 {
 	void* factoryFuncRaw = library.GetFunction(factoryName);
 	if (factoryFuncRaw == nullptr)
-		throw std::exception(("Could not find function '" + factoryName + "' from library: " + StringUtils::ToUTF8(library.GetName())).c_str());
+		throw std::exception(("Could not find function '" + factoryName + "' from library: "/* + StringUtils::ToUTF8(library.GetName())*/).c_str());
 	ModuleFactoryPtr ptr = (ModuleFactoryPtr)factoryFuncRaw;
 	auto module = ptr();
 	m_modules.emplace_back(module, &library);
@@ -107,3 +107,9 @@ const ProjectC::Modules::ModuleInfo& ProjectC::Modules::ModuleManager::AddModule
 
 ProjectC::Modules::ModuleInfo::ModuleInfo(IModule* module, DynamicLibrary* library /*= nullptr*/) : m_module(module), m_library(library)
 { }
+
+bool ProjectC::Modules::ModuleInfo::AddRoutine(int16_t id, IModule::Routine routine)
+{
+	auto result = m_routines.emplace(id, routine);
+	return result.second;
+}

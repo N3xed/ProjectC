@@ -1,0 +1,27 @@
+#pragma once
+#include <cstdint>
+
+
+namespace ProjectC::Interface::Detail {
+	enum class BrowserProcessMessageType : int32_t {
+		LOG = 0,
+		ON_EXECUTE = 1,
+		EXEC_MODULE_LISTENER = 2,
+		GET_STR_RESOURCE = 3,
+		QUERY_RESPONSE = 4
+	};
+
+	enum class RenderProcessMessageType : int32_t {
+		STR_RESOURCE_RESPONSE = 0,
+		MODULE_CHANGED = 1,
+		EXEC_JS_LISTENER = 2,
+		STATUSBAR_PUSH_STATUS = 3,
+		STATUSBAR_ADD_CHILD = 4,
+		STATUSBAR_REMOVE_ALL_CHILDS = 5,
+		STATUSBAR_REMOVE_CHILD_BY_ID = 6,
+		STATUSBAR_REMOVE_CHILDS_BY_CLASS = 7,
+		STATUSBAR_REMOVE_CHILDS_BY_ATTR = 8,
+		SHOW = 9,
+		QUERY = 10
+	};
+}

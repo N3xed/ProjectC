@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -28,14 +28,14 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <CLRSupport>false</CLRSupport>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <CLRSupport>false</CLRSupport>
@@ -43,14 +43,14 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <CLRSupport>false</CLRSupport>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <CLRSupport>false</CLRSupport>
@@ -74,28 +74,32 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>$(ProjectDir)$(Configuration)\</OutDir>
+    <OutDir>$(ProjectDir)bin\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(ProjectDir)$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\bin\</OutDir>
+    <IntDir>$(SolutionDir)$(Platform)\$(Configuration)\intermediates\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\include\wx\msvc;$(SolutionDir)Dependencies\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>DBOOST_DATE_TIME_NO_LIB;DBOOST_REGEX_NO_LIB;_WIN32_WINDOWS;_WINSOCK_DEPRECATED_NO_WARNINGS;WIN32_LEAN_AND_MEAN;_CRT_SECURE_NO_WARNINGS;wxMSVC_VERSION_AUTO;__WXMSW__;U_STATIC_IMPLEMENTATION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\include;$(SolutionDir)Dependencies\include\cef;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>DBOOST_DATE_TIME_NO_LIB;DBOOST_REGEX_NO_LIB;_WIN32_WINDOWS;_WINSOCK_DEPRECATED_NO_WARNINGS;WIN32_LEAN_AND_MEAN;_CRT_SECURE_NO_WARNINGS;U_STATIC_IMPLEMENTATION;_X86_;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalUsingDirectories>%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
       <CompileAsManaged>false</CompileAsManaged>
       <AdditionalOptions>/std:c++latest %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\libs\wx\vc140_lib;$(SolutionDir)Dependencies\libs\boost;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\libs\cef;$(SolutionDir)Dependencies\libs\sdl;$(SolutionDir)Dependencies\libs\boost;$(SolutionDir)Dependencies\libs\awesomium;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <PreventDllBinding>
       </PreventDllBinding>
-      <AdditionalDependencies>$(SolutionDir)Dependencies\libs\unicode\common.lib;$(SolutionDir)Dependencies\libs\unicode\icudt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>awesomium.lib;SDL2.lib;winmm.lib;libcef.lib;libcef_dll_wrapper.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AddModuleNamesToAssembly>
       </AddModuleNamesToAssembly>
     </Link>
@@ -106,18 +110,18 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\include\wx\msvc;$(SolutionDir)Dependencies\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>DBOOST_DATE_TIME_NO_LIB;DBOOST_REGEX_NO_LIB;_WIN32_WINDOWS;_WINSOCK_DEPRECATED_NO_WARNINGS;WIN32_LEAN_AND_MEAN;_CRT_SECURE_NO_WARNINGS;wxMSVC_VERSION_AUTO;__WXMSW__;U_STATIC_IMPLEMENTATION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\include;$(SolutionDir)Dependencies\include\cef;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_WIN32_WINDOWS;_WINSOCK_DEPRECATED_NO_WARNINGS;WIN32_LEAN_AND_MEAN;_CRT_SECURE_NO_WARNINGS;U_STATIC_IMPLEMENTATION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalUsingDirectories>%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
       <CompileAsManaged>false</CompileAsManaged>
       <AdditionalOptions>/std:c++latest %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\libs\wx\vc140_lib;$(SolutionDir)Dependencies\libs\boost;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\libs\cef;$(SolutionDir)Dependencies\libs\boost;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <PreventDllBinding>
       </PreventDllBinding>
-      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)Dependencies\libs\cef\libcef.lib;$(SolutionDir)Dependencies\libs\cef\libcef_dll_wrapper.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AddModuleNamesToAssembly>
       </AddModuleNamesToAssembly>
     </Link>
@@ -130,7 +134,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\include\wx\msvc;$(SolutionDir)Dependencies\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>DBOOST_DATE_TIME_NO_LIB;DBOOST_REGEX_NO_LIB;_WIN32_WINDOWS;_WINSOCK_DEPRECATED_NO_WARNINGS;WIN32_LEAN_AND_MEAN;_CRT_SECURE_NO_WARNINGS;wxMSVC_VERSION_AUTO;__WXMSW__;U_STATIC_IMPLEMENTATION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalUsingDirectories>%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
       <CompileAsManaged>false</CompileAsManaged>
@@ -142,7 +146,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\libs\wx\vc140_lib;$(SolutionDir)Dependencies\libs\boost;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AddModuleNamesToAssembly>%(AddModuleNamesToAssembly)</AddModuleNamesToAssembly>
-      <AdditionalDependencies>$(SolutionDir)Dependencies\libs\unicode\release\common.lib;$(SolutionDir)Dependencies\libs\unicode\release\icudt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -152,7 +156,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\include\wx\msvc;$(SolutionDir)Dependencies\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>DBOOST_DATE_TIME_NO_LIB;DBOOST_REGEX_NO_LIB;_WIN32_WINDOWS;_WINSOCK_DEPRECATED_NO_WARNINGS;WIN32_LEAN_AND_MEAN;_CRT_SECURE_NO_WARNINGS;wxMSVC_VERSION_AUTO;__WXMSW__;U_STATIC_IMPLEMENTATION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalUsingDirectories>%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
       <CompileAsManaged>false</CompileAsManaged>
@@ -162,74 +166,80 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\libs\wx\vc140_lib;$(SolutionDir)Dependencies\libs\boost;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\libs\boost;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\Application.cpp" />
-    <ClCompile Include="src\Bootstrap.cpp" />
     <ClCompile Include="src\Config.cpp">
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'"> %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
-    <ClCompile Include="src\Interface\ConsoleFrame.cpp" />
-    <ClCompile Include="src\Interface\InvokeEvent.cpp" />
+    <ClCompile Include="src\Interface\BrowserHandler.cpp" />
+    <ClCompile Include="src\Interface\BrowserWindow.cpp" />
+    <ClCompile Include="src\Interface\ConsoleWindow.cpp" />
+    <ClCompile Include="src\Interface\Detail\Platform\ConsoleWindowWin.cpp" />
+    <ClCompile Include="src\Interface\Detail\ResourceHandlers.cpp" />
+    <ClCompile Include="src\Interface\Detail\StatusbarImpl.cpp" />
+    <ClCompile Include="src\Interface\GUIContext.cpp" />
+    <ClCompile Include="src\Interface\Resources\ResourceManager.cpp" />
+    <ClCompile Include="src\Interface\Detail\SchemeHandlerFactory.cpp" />
+    <ClCompile Include="src\Interface\Detail\Platform\BrowserWindowWin.cpp" />
+    <ClCompile Include="src\Interface\Detail\Platform\WindowManagerWin.cpp" />
+    <ClCompile Include="src\Interface\Detail\Platform\WindowWin.cpp" />
     <ClCompile Include="src\Interface\Localization\StringResources.cpp" />
-    <ClCompile Include="src\Interface\NavButton.cpp" />
-    <ClCompile Include="src\Interface\NavigationArrowPanel.cpp" />
-    <ClCompile Include="src\Interface\ProjectCApp.cpp" />
-    <ClCompile Include="src\Interface\ProjectCFrame.cpp" />
-    <ClCompile Include="src\Interface\StatusBar.cpp" />
+    <ClCompile Include="src\Interface\WindowManager.cpp" />
+    <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Modules\DynamicLibrary.cpp" />
     <ClCompile Include="src\Modules\ExecutionManager.cpp" />
     <ClCompile Include="src\Modules\LibraryManager.cpp" />
     <ClCompile Include="src\Modules\ModuleManager.cpp" />
-    <ClCompile Include="src\Networking\ByteBuffer.cpp" />
+    <ClCompile Include="src\Networking\UdpConnection.cpp" />
+    <ClCompile Include="src\Serialization\ByteBuffer.cpp" />
     <ClCompile Include="src\Modules\ExecutionContext.cpp" />
     <ClCompile Include="src\Networking\ConnectionManager.cpp" />
-    <ClCompile Include="src\Networking\Endpoint.cpp">
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</CompileAsManaged>
-    </ClCompile>
-    <ClCompile Include="src\Networking\TcpConnection.cpp">
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</CompileAsManaged>
-    </ClCompile>
-    <ClCompile Include="src\Networking\TcpServer.cpp">
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</CompileAsManaged>
-    </ClCompile>
-    <ClCompile Include="src\Networking\UdpServer.cpp">
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</CompileAsManaged>
-    </ClCompile>
-    <ClCompile Include="src\String.cpp" />
+    <ClCompile Include="src\Networking\Endpoint.cpp" />
+    <ClCompile Include="src\Networking\TcpConnection.cpp" />
+    <ClCompile Include="src\Networking\TcpServer.cpp" />
+    <ClCompile Include="src\Networking\UdpServer.cpp" />
+    <ClCompile Include="src\Utils\String.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Application.h" />
     <ClInclude Include="src\Bootstrap.h" />
     <ClInclude Include="src\Config.h" />
     <ClInclude Include="src\ConfigKeys.h" />
+    <ClInclude Include="src\FactoryManager.h" />
     <ClInclude Include="src\IDisposable.h" />
     <ClInclude Include="src\IHandle.h" />
-    <ClInclude Include="src\IApplication.h" />
-    <ClInclude Include="src\Interface\ConsoleFrame.h" />
-    <ClInclude Include="src\Interface\IFrame.h" />
-    <ClInclude Include="src\Interface\InvokeEvent.h" />
-    <ClInclude Include="src\Interface\IStatusBar.h" />
-    <ClInclude Include="src\Interface\Localization\LanguageHelper.h" />
-    <ClInclude Include="src\Interface\NavButton.h" />
-    <ClInclude Include="src\Interface\NavigationArrowPanel.h" />
+    <ClInclude Include="src\App.h" />
+    <ClInclude Include="src\Interface\BrowserHandler.h" />
+    <ClInclude Include="src\Interface\ConsoleWindow.h" />
+    <ClInclude Include="src\Interface\Detail\FunctorTask.hpp" />
+    <ClInclude Include="src\Interface\Detail\JSAppImpl.hpp" />
+    <ClInclude Include="src\Interface\Detail\Platform\BrowserHandlerWin.h" />
+    <ClInclude Include="src\Interface\Detail\Platform\BrowserWindowWin.h" />
+    <ClInclude Include="src\Interface\BrowserWindow.h" />
+    <ClInclude Include="src\Interface\Detail\Platform\ConsoleWindowWin.h" />
+    <ClInclude Include="src\Interface\Detail\Platform\WindowManagerWin.h" />
+    <ClInclude Include="src\Interface\Detail\StatusbarImpl.h" />
+    <ClInclude Include="src\Interface\GUIContext.h" />
+    <ClInclude Include="src\Interface\IStatusbar.h" />
+    <ClInclude Include="src\Interface\IWindow.h" />
+    <ClInclude Include="src\Interface\IClosable.h" />
+    <ClInclude Include="src\Interface\IPeerInfo.h" />
     <ClInclude Include="src\Interface\NavigationElement.h" />
-    <ClInclude Include="src\Interface\StatusBar.h" />
+    <ClInclude Include="src\Interface\Detail\ProcessMessageTypes.h" />
+    <ClInclude Include="src\Interface\ProjectCApp.h" />
+    <ClInclude Include="src\Interface\ProjectCHandler.h" />
+    <ClInclude Include="src\Interface\Localization\LanguageHelper.h" />
     <ClInclude Include="src\Interface\Localization\StringKeys.h" />
+    <ClInclude Include="src\Interface\Detail\Platform\WindowWin.h" />
+    <ClInclude Include="src\Interface\Detail\RenderProcessHandler.hpp" />
+    <ClInclude Include="src\Interface\Detail\ResourceHandlers.h" />
+    <ClInclude Include="src\Interface\Resources\ResourceManager.h" />
+    <ClInclude Include="src\Interface\Detail\SchemeHandlerFactory.h" />
+    <ClInclude Include="src\Interface\WindowManager.h" />
+    <ClInclude Include="src\HandlerList.h" />
     <ClInclude Include="src\InvocationList.h" />
     <ClInclude Include="src\Logger.h" />
     <ClInclude Include="src\Modules\DynamicLibrary.h" />
@@ -238,27 +248,39 @@
     <ClInclude Include="src\Modules\ExecutionContext.h" />
     <ClInclude Include="src\Networking\ConnectionManager.h" />
     <ClInclude Include="src\Networking\IServer.h" />
+    <ClInclude Include="src\Platform.h" />
     <ClInclude Include="src\RoutedException.h" />
     <ClInclude Include="src\Networking\ThreadedTcpConnection.h" />
-    <ClInclude Include="src\String.h" />
+    <ClInclude Include="src\Serialization\BinaryConverter.h" />
+    <ClInclude Include="src\Serialization\BinarySerializer.h" />
+    <ClInclude Include="src\Serialization\IBinaryConverter.h" />
+    <ClInclude Include="src\Serialization\IByteReader.h" />
+    <ClInclude Include="src\Serialization\IByteWriter.h" />
+    <ClInclude Include="src\Serialization\IReader.h" />
+    <ClInclude Include="src\Serialization\IWriter.h" />
+    <ClInclude Include="src\UniString.h" />
+    <ClInclude Include="src\Utils\String.h" />
     <ClInclude Include="src\Interface\IGUIModule.h" />
-    <ClInclude Include="src\Interface\ProjectCApp.h" />
-    <ClInclude Include="src\Interface\ProjectCFrame.h" />
-    <ClInclude Include="src\main.cpp" />
     <ClInclude Include="src\Modules\IModule.h" />
     <ClInclude Include="src\Modules\ModuleManager.h" />
-    <ClInclude Include="src\Networking\Container.h" />
-    <ClInclude Include="src\Networking\ByteBuffer.h" />
+    <ClInclude Include="src\Serialization\ByteBuffer.h" />
     <ClInclude Include="src\Networking\Packet.h" />
-    <ClInclude Include="src\Networking\IByteBuffer.h" />
+    <ClInclude Include="src\Serialization\IByteBuffer.h" />
     <ClInclude Include="src\Networking\IConnection.h" />
     <ClInclude Include="src\Networking\Endpoint.h" />
     <ClInclude Include="src\Networking\TcpConnection.h" />
-    <ClInclude Include="src\Networking\TCPServer.h" />
+    <ClInclude Include="src\Networking\TcpServer.h" />
     <ClInclude Include="src\Networking\UdpConnection.h" />
     <ClInclude Include="src\Networking\UdpServer.h" />
-    <ClInclude Include="src\Utils.h" />
+    <ClInclude Include="src\Utils\Utils.h" />
     <ClInclude Include="src\ThreadManager.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\Interface\Resources\Scripts\app.js" />
+    <None Include="src\Interface\Resources\Pages\MainWindow.htm">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="src\Interface\Resources\Pages\MainWindowStyle.css" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

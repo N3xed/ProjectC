@@ -15,15 +15,14 @@ namespace ProjectC {
 
 			UdpServer& m_server;
 			boost::asio::ip::udp::endpoint m_remoteEndpoint;
-			Buffer m_buffer;
+			const uint8_t* m_buffer;
+			size_t m_bufferSize;
 			std::weak_ptr<Packet> m_lastPacket;
 			ErrorHandler m_errorHandler{ nullptr };
 			CloseHandler m_closeHandler{ nullptr };
 		public:
-			UdpConnection(UdpServer& server) : m_server(server), m_buffer(0, server.m_buffer.get())
-			{}
-			UdpConnection(UdpServer& server, boost::asio::ip::udp::endpoint remoteEndpoint) : m_server(server), m_buffer(0, server.m_buffer.get()), m_remoteEndpoint(remoteEndpoint)
-			{}
+			UdpConnection(UdpServer& server);
+			UdpConnection(UdpServer& server, boost::asio::ip::udp::endpoint remoteEndpoint);
 
 			virtual Endpoint GetLocalEndpoint() const override {
 				return m_server.GetEndpoint();
@@ -34,31 +33,15 @@ namespace ProjectC {
 			virtual ProtocolType GetProtocolType() const override {
 				return ProtocolType::UDP;
 			}
-
 			UdpServer& GetServer() {
 				return m_server;
 			}
 
-			virtual bool Send(const uint8_t* buffer, size_t length) override {
-				try {
-					m_server.GetSocket().send_to(boost::asio::buffer(buffer, length), m_remoteEndpoint);
-				}
-				catch (boost::system::error_code& errCode) {
-					m_errorHandler(*this, std::exception(errCode.message().c_str(), errCode.value()));
-					return false;
-				}
-				return true;
-			}
+			virtual bool Send(const uint8_t* buffer, size_t length) override;
+			virtual void SendAsync(const uint8_t* buffer, size_t length, SendHandler handler = SendHandler(nullptr)) override;
+			virtual void Close() override;
 
-			virtual void SendAsync(const uint8_t* buffer, size_t length, SendHandler handler = SendHandler(nullptr)) override {
-				m_server.GetSocket().async_send_to(boost::asio::buffer(buffer, length), m_remoteEndpoint, [&handler](const boost::system::error_code& errCode, size_t bytesTransferred) -> void{
-					handler(errCode.value() == 0, std::exception(errCode.message().c_str(), errCode.value()));
-				});
-			}
-
-			virtual Buffer GetBuffer() const override {
-				return m_buffer;
-			}
+			virtual std::tuple<const uint8_t*, size_t> GetBuffer() const override;
 
 			virtual Packet* GetLastPacket() override {
 				return m_lastPacket.lock().get();
@@ -75,23 +58,13 @@ namespace ProjectC {
 			virtual void SetErrorHandler(ErrorHandler handler) override {
 				m_errorHandler = handler;
 			}
-
-			virtual void Close() override
-			{
-				assert(m_closeHandler);
-				m_closeHandler();
-			}
-
 			void SetCloseHandler(CloseHandler handler) {
 				m_closeHandler = handler;
 			}
-
-			virtual void SetDisconnectedHandler(DisconnectedHandler handler) override
-			{
+			virtual void SetDisconnectedHandler(DisconnectedHandler handler) override {
 				assert(false);
 				throw std::logic_error("Operation not supported.");
 			}
-
 		};
 	}
 }

@@ -1,24 +1,21 @@
 #pragma once
-
-#include <string>
-
-class wxWindow;
+#include "../UniString.h"
 
 namespace ProjectC::Interface {
-
-	class IStatusBar {
+	class IStatusbar {
 	public:
-		virtual uint32_t PushStatus(const std::string& text) = 0;
-		virtual void PopStatus(uint32_t id) = 0;
-		virtual void PopStatus() = 0;
+		virtual ~IStatusbar() {}
 
-		virtual void AddLeft(wxWindow* widget) = 0;
-		virtual void AddLeftSpacer(size_t width) = 0;
-		virtual void AddRight(wxWindow* widget) = 0;
-		virtual void AddRightSpacer(size_t width) = 0;
+		virtual void Show(bool show = true) = 0;
+		void Hide() { Show(false); }
 
-		virtual wxWindow* GetContainer() = 0;
+		virtual void PushStatus(const UniString& str) = 0;
 
-		virtual void Clear() = 0;
+		virtual void AddChild(const UniString& htmlCode) = 0;
+		virtual void RemoveChilds(const UniString& className) = 0;
+		virtual void RemoveChilds(const UniString& attributeName, const UniString& value) = 0;
+		virtual void RemoveChild(const UniString& id) = 0;
+
+		virtual void RemoveChilds() = 0;
 	};
 }

@@ -14,14 +14,15 @@ void ProjectC::Networking::TcpConnection::Start()
 	assert(m_receiveHandler);
 
 	m_running = true;
-	m_buffer.DataPtr = std::make_unique<uint8_t[]>(MAX_PACKET_SIZE);
+	m_buffer = std::make_unique<uint8_t[]>(MAX_PACKET_SIZE);
 	start_receive();
 }
 
 void ProjectC::Networking::TcpConnection::Stop()
 {
 	m_running = false;
-	m_buffer.DataPtr.reset();
+	m_buffer.reset();
+	m_bufferDataSize = 0;
 }
 
 bool ProjectC::Networking::TcpConnection::Connect(const boost::asio::ip::tcp::endpoint& endpoint)
@@ -104,9 +105,9 @@ void ProjectC::Networking::TcpConnection::SendAsync(const uint8_t* buffer, size_
 	});
 }
 
-ProjectC::Networking::Buffer ProjectC::Networking::TcpConnection::GetBuffer() const
+std::tuple<const uint8_t*, size_t> ProjectC::Networking::TcpConnection::GetBuffer() const
 {
-	return Buffer(m_buffer.Length, m_buffer.DataPtr.get());
+	return std::make_tuple(const_cast<const uint8_t*>(m_buffer.get()), m_bufferDataSize);
 }
 
 ProjectC::Networking::Packet* ProjectC::Networking::TcpConnection::GetLastPacket()
@@ -129,7 +130,7 @@ void ProjectC::Networking::TcpConnection::connect_handler(const boost::system::e
 
 void ProjectC::Networking::TcpConnection::start_receive()
 {
-	m_socket.async_receive(boost::asio::buffer(m_buffer.DataPtr.get(), MAX_PACKET_SIZE), boost::bind(&TcpConnection::handle_receive, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
+	m_socket.async_receive(boost::asio::buffer(m_buffer.get(), MAX_PACKET_SIZE), boost::bind(&TcpConnection::handle_receive, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
 }
 
 void ProjectC::Networking::TcpConnection::handle_receive(const boost::system::error_code& err_code, size_t length)
@@ -149,9 +150,9 @@ void ProjectC::Networking::TcpConnection::handle_receive(const boost::system::er
 		}
 	}
 	else {
-		m_buffer.Length = length;
+		m_bufferDataSize = length;
 		m_receiveHandler(*this);
-		memset(m_buffer.DataPtr.get(), 0, length);
+		memset(m_buffer.get(), 0, length);
 		start_receive();
 	}
 }

@@ -20,7 +20,8 @@ namespace ProjectC {
 			DisconnectedHandler m_disconnectHandler{ nullptr };
 			bool m_running{ false };
 			bool m_closed{ false };
-			UniqueBuffer m_buffer;
+			std::unique_ptr<uint8_t[]> m_buffer;
+			size_t m_bufferDataSize;
 			std::weak_ptr<Packet> m_lastPacket;
 		public:
 			TcpConnection(boost::asio::io_service& io_service);
@@ -54,7 +55,7 @@ namespace ProjectC {
 				return ProtocolType::TCP;
 			}
 
-			virtual Buffer GetBuffer() const override;
+			virtual std::tuple<const uint8_t*, size_t> GetBuffer() const override;
 			virtual Packet* GetLastPacket() override;
 			virtual void SetLastPacket(std::weak_ptr<Packet> packet) override;
 

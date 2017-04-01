@@ -5,12 +5,15 @@ namespace ProjectC::Interface::StringResources {
 		"Ready", 
 		"Initializing...", 
 		"Shutting down...", 
+		"Loading...",
 		
 		"ProjectC", 
 		"Console", 
 		
 		"Home", 
 		"Options", 
-		"Info"
+		"Info",
+		"Peers",
+		"Add"
 	};
 }

@@ -7,26 +7,23 @@
 
 namespace ProjectC {
 
-	const enum class LogType : uint8_t {
-		NORMAL = 0,
-		WARN = 1,
-		FATAL = 2
-	};
+	const enum class LogType : uint8_t;
 
 	class ILogger {
 	public:
 		struct LogInfo {
 			boost::posix_time::ptime Time;
 			LogType Importance;
-			std::string Message;
+			UniString Message;
 		};
 
-		virtual void Log(const std::string& str, LogType type) = 0;
+		virtual std::mutex& GetMutex() = 0;
+		virtual void Log(const UniString& str, LogType type) = 0;
 	};
 
 	class QueueLogger : public ILogger {
 	public:
-		typedef std::function<void(QueueLogger& logger)> Handler;
+		typedef std::function<void(const ILogger::LogInfo& log)> Handler;
 	private:
 		std::queue<LogInfo> m_queue;
 		std::mutex m_queueMutex;
@@ -36,30 +33,50 @@ namespace ProjectC {
 		{}
 
 		void SetHandler(Handler handler) {
-			m_handler = handler;
-			if (handler && m_queue.size() > 0)
-				handler(*this);
+			{
+				std::lock_guard<std::mutex> guard{ m_queueMutex };
+				m_handler = handler;
+			}
+			HandleLogs();
+		}
+
+		virtual std::mutex& GetMutex() {
+			return m_queueMutex;
 		}
 
 		size_t Length() const {
 			return m_queue.size();
 		}
-		LogInfo PopLog() {
-			std::lock_guard<std::mutex> lock{ m_queueMutex };
-			LogInfo result = m_queue.front();
+		void PopLog() {
 			m_queue.pop();
-			return result;
 		}
 
-		virtual void Log(const std::string& str, LogType type) override {
-			std::lock_guard<std::mutex> lock{ m_queueMutex };
+		LogInfo& PeekLog() {
+			return m_queue.front();
+		}
+
+		virtual void Log(const UniString& str, LogType type) override {
 			LogInfo result{};
 			result.Importance = type;
 			result.Message = str;
 			result.Time = boost::posix_time::second_clock::local_time();
-			m_queue.push(std::move(result));
-			if (m_handler)
-				m_handler(*this);
+			{
+				std::lock_guard<std::mutex> lock{ m_queueMutex };
+				m_queue.push(std::move(result));
+			}
+			HandleLogs();
+		}
+
+		void HandleLogs() {
+			std::lock_guard<std::mutex> guard{ m_queueMutex };
+			if (m_queue.size() == 0 || !m_handler)
+				return;
+
+			while (!m_queue.empty()) {
+				auto& log = m_queue.front();
+				m_handler(log);
+				m_queue.pop();
+			}
 		}
 	};
 }
