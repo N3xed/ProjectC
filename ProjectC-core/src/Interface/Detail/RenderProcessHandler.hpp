@@ -1,25 +1,37 @@
 #pragma once
 #include <cef/include/cef_render_process_handler.h>
 #include "../Resources/ResourceManager.h"
-#include "JSAppImpl.hpp"
+#include "JSApp.hpp"
+#include "../../Logging.h"
 
 namespace ProjectC::Interface::Detail {
 	class RenderProcessHandler : public CefRenderProcessHandler, public CefLoadHandler {
 	private:
-		CefRefPtr<Detail::JSAppObj> m_appObj;
+		CefRefPtr<Detail::JSApp> m_jsApp;
 	public:
 		virtual void OnWebKitInitialized() override
 		{
+			auto& logger = Logging::Logger::GetInstance();
+			logger.OnLog().Clear();
+			logger.OnLog().Add([](const Logging::LogMessage& msg) {
+				LOG(INFO) << msg.Message;
+
+				const cef_string_utf16_t* strStruct = msg.Message.GetStruct();
+				WriteConsoleW(GetStdHandle(STD_OUTPUT_HANDLE), strStruct->str, strStruct->length, NULL, NULL);
+			});
+			
+			PROJC_LOG(NORMAL, "Starting render process.");
+
+			m_jsApp = new JSApp("", -1);
+
 			UniString str;
 			{
 				std::unique_ptr<ResourceDelegate> del{ ResourceDelegate::CreateFromFile("", "D:/Projects/ProjectC/ProjectC-core/src/Interface/Resources/Scripts/app.js", true) };
 				del->AsString(str);
 			}
-
-			m_appObj = new Detail::JSAppObj();
-			m_appObj->ResetModuleObject("", -1);
-
-			CefRegisterExtension("v8/app", str, new Detail::JSAppObj());
+			
+			if (!CefRegisterExtension("app", str, m_jsApp))
+				PROJC_LOG(FATAL, "Failed to register extension.");
 		}
 
 		virtual CefRefPtr<CefLoadHandler> GetLoadHandler() override
@@ -28,36 +40,35 @@ namespace ProjectC::Interface::Detail {
 		}
 
 		virtual void OnContextCreated(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, CefRefPtr<CefV8Context> context) override
-		{
-			
-		}
+		{ }
 
 		virtual void OnContextReleased(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, CefRefPtr<CefV8Context> context) override
 		{
-			if (m_appObj) {
-				m_appObj->RemoveListenersOfV8Context(context);
-				m_appObj->GetModuleObject()->RemoveCallbacksOfV8Context(context);
+			if (m_jsApp) {
+				m_jsApp->RemoveV8Context(context);
 			}
 		}
 
 		virtual void OnUncaughtException(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, CefRefPtr<CefV8Context> context, CefRefPtr<CefV8Exception> exception, CefRefPtr<CefV8StackTrace> stackTrace) override
 		{
-			LogFromRenderProcess(browser, StringUtils::Concatenate("[Javascript] Uncaught exception in ", exception->GetScriptResourceName(), ":", exception->GetLineNumber(), "(", exception->GetMessageW(), ")", GetStackTrace(stackTrace)));
+			LogFromRenderProcess(browser, StringUtils::Concatenate("[Javascript] Uncaught exception in ", exception->GetScriptResourceName(), ":", exception->GetLineNumber(), "(", exception->GetMessageW(), ") ", GetStackTrace(stackTrace)));
 		}
 
 		virtual bool OnProcessMessageReceived(CefRefPtr<CefBrowser> browser, CefProcessId source_process, CefRefPtr<CefProcessMessage> message) override
 		{
-			if (source_process == PID_BROWSER && m_appObj && message->IsValid() && message->GetArgumentList()->GetSize() > 0 && message->GetArgumentList()->GetType(0) == VTYPE_INT) {
+			PROJC_LOG(NORMAL, "ProcessMessage: ", source_process, ", ", message->GetName(), ", ", message->GetArgumentList()->GetSize());
+
+			if (source_process == PID_BROWSER && m_jsApp && message->IsValid() && message->GetName() == ProcessMessageName) {
 				auto argsList = message->GetArgumentList();
 				switch (argsList->GetInt(0)) {
 				case (int32_t)RenderProcessMessageType::EXEC_JS_LISTENER:
-					m_appObj->ExecuteJSListener(argsList->GetString(1), argsList->GetValue(2));
+					m_jsApp->ExecuteRegisteredListener(argsList->GetString(1), argsList->GetValue(2));
 					break;
 				case (int32_t)RenderProcessMessageType::MODULE_CHANGED:
-					m_appObj->ResetModuleObject(argsList->GetString(1), argsList->GetInt(2));
+					m_jsApp->SetModule(argsList->GetString(1), argsList->GetInt(2));
 					break;
 				case (int32_t)RenderProcessMessageType::STR_RESOURCE_RESPONSE:
-					m_appObj->GetModuleObject()->ExecuteStringResCallback(argsList->GetString(1), argsList->GetInt(2), argsList->GetInt(3));
+					m_jsApp->ExecuteStringResCallback(argsList->GetString(1), argsList->GetInt(2), argsList->GetInt(3));
 					break;
 				case (int32_t)RenderProcessMessageType::STATUSBAR_PUSH_STATUS:
 
@@ -66,6 +77,16 @@ namespace ProjectC::Interface::Detail {
 				case (int32_t)RenderProcessMessageType::STATUSBAR_REMOVE_CHILD_BY_ID:
 				case (int32_t)RenderProcessMessageType::STATUSBAR_REMOVE_CHILDS_BY_CLASS:
 				case (int32_t)RenderProcessMessageType::STATUSBAR_REMOVE_CHILDS_BY_ATTR:
+					return false;
+				case (int32_t)RenderProcessMessageType::EXEC_JS_CODE:
+				{
+					PROJC_LOG(NORMAL, "EXEC_JS_CODE: ", argsList->GetString(1));
+					UniString str = argsList->GetString(1);
+					CefPostTask(TID_RENDERER, new Detail::FunctorTask([browser, str]() {
+						browser->GetMainFrame()->ExecuteJavaScript(str, "codeFromConsole", 0);
+					}));
+					break;
+				}
 				default:
 					return false;
 				}
@@ -96,13 +117,14 @@ namespace ProjectC::Interface::Detail {
 		}
 
 		static void LogFromRenderProcess(CefRefPtr<CefBrowser> browser, const UniString& str) {
-			LOG(FATAL) << str << std::endl;
+			PROJC_LOG(NORMAL, str);
 
-			auto processMsg = CefProcessMessage::Create("log");
+			auto processMsg = CefProcessMessage::Create(ProcessMessageName);
 			auto val = CefValue::Create();
 			val->SetString(str);
 
-			processMsg->GetArgumentList()->SetValue(0, val);
+			processMsg->GetArgumentList()->SetInt(0, static_cast<int32_t>(BrowserProcessMessageType::LOG));
+			processMsg->GetArgumentList()->SetValue(1, val);
 			browser->SendProcessMessage(PID_BROWSER, processMsg);
 		}
 

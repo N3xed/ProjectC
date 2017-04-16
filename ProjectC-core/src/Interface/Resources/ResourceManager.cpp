@@ -1,7 +1,7 @@
 #include "ResourceManager.h"
 #include <fstream>
 #include <boost/filesystem.hpp>
-#include "../../App.h"
+#include "../../Logging.h"
 
 
 namespace ProjectC::Interface::Detail {
@@ -65,7 +65,7 @@ namespace ProjectC::Interface::Detail {
 						fs.read(reinterpret_cast<char*>(m_data), m_dataSize);
 					}
 					else {
-						LOG_WARN("Filestream not good.");
+						PROJC_LOG(WARN, "Filestream not good.");
 						return false;
 					}
 				}
@@ -74,7 +74,7 @@ namespace ProjectC::Interface::Detail {
 				return true;
 			}
 			catch (const std::exception& ex) {
-				LOG_WARN("Exception thrown: ", ex.what());
+				PROJC_LOG(WARN, "Exception thrown: ", ex.what());
 			}
 			return false;
 		}
@@ -152,7 +152,7 @@ ProjectC::Interface::ResourceDelegate* ProjectC::Interface::ResourceDelegate::Cr
 		return result.release();
 	}
 	catch (const std::exception& ex) {
-		LOG_WARN(ex.what());
+		PROJC_LOG(WARN, ex.what());
 		return nullptr;
 	}
 }

@@ -21,18 +21,11 @@ void ProjectC::Application::Exit(bool force)
 	Interface::WindowManager::GetInstance().CloseAllWindowsAsync(force);
 }
 
-void ProjectC::Application::Log(const std::string& msg, LogType type /*= static_cast<LogType>(0)*/)
-{
-	m_logger.Log(msg, type);
-}
-
 ProjectC::Application::Application(CefMainArgs& args)
 {
 	s_instance = this;
 
-	m_logger.SetHandler([](const ILogger::LogInfo& log) {
-		LOG(INFO) << log.Message;
-	});
+	
 
 	if (!Interface::GUIContext::Initialize(args)) {
 		throw std::exception("Could not initialize interface");

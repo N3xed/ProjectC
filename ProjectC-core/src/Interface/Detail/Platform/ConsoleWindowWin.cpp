@@ -1,6 +1,7 @@
 #include "ConsoleWindowWin.h"
 #include "../../../App.h"
 #include "WindowWin.h"
+#include "../../../Logging.h"
 
 ProjectC::Interface::Detail::ConsoleWindowWin* ProjectC::Interface::Detail::ConsoleWindowWin::s_instance{ nullptr };
 
@@ -10,12 +11,12 @@ ProjectC::Interface::Detail::ConsoleWindowWin::ConsoleWindowWin(const UniString&
 	s_instance = this;
 
 	if (!::AllocConsole()) {
-		LOG_FATAL("AllocConsole failed. ", WindowWin::GetLastErrorString());
+		PROJC_LOG(FATAL, "AllocConsole failed. ", WindowWin::GetLastErrorString());
 		throw std::exception("AllocConsole failed.");
 	}
 	m_inputHandle = GetStdHandle(STD_INPUT_HANDLE);
 	m_outputHandle = GetStdHandle(STD_OUTPUT_HANDLE);
-	
+
 	::SetConsoleTitleW(title.ToWString().c_str());
 	::SetConsoleCtrlHandler(&ConsoleWindowWin::WinHandlerRoutine, TRUE);
 
@@ -67,7 +68,11 @@ void ProjectC::Interface::Detail::ConsoleWindowWin::ThreadRoutine()
 
 	while (m_running) {
 		if (ReadConsoleW(m_inputHandle, buf, 8192, &charsRead, NULL)) {
-			StringUtils::SplitString(UniString{ buf, static_cast<size_t>(charsRead - 2), false }, tempStr, m_delimiter, subStrings);
+			UniString cmdLine = UniString{ buf, static_cast<size_t>(charsRead - 2), false };
+			if (!m_pinnedCommand.empty())
+				cmdLine = StringUtils::Concatenate<wchar_t>(m_pinnedCommand, " ", cmdLine);
+
+			StringUtils::SplitString(cmdLine, tempStr, m_delimiter, subStrings);
 			if (!m_commandReceivedListeners(*this, subStrings)) {
 				Write(StringUtils::Concatenate("[Info] Command '", tempStr, "' not found.\n"));
 			}
@@ -75,8 +80,8 @@ void ProjectC::Interface::Detail::ConsoleWindowWin::ThreadRoutine()
 			tempStr.clear();
 		}
 		else {
-			if(m_running)
-				LOG_WARN("ReadConsoleW failed.");
+			if (m_running)
+				PROJC_LOG(WARN, "ReadConsoleW failed.");
 			break;
 		}
 	}

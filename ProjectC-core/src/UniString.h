@@ -6,6 +6,7 @@ namespace ProjectC {
 	typedef CefString UniString;
 
 	typedef std::basic_string<CefString::char_type> BasicUniString;
+	typedef std::basic_stringstream<CefString::char_type> BasicUniStringStream;
 }
 
 namespace std {

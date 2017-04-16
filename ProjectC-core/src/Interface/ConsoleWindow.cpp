@@ -31,25 +31,37 @@ ProjectC::Interface::ConsoleWindow::ConsoleWindow()
 			return false;
 		std::vector<CommandInfo>& commands = console.GetCommands();
 		UniString cmdName{ args[0].String, args[0].Length, false };
-		bool found = false;
+		
 		for (auto& e : commands) {
 			for (auto& name : e.names) {
 				if (name == cmdName) {
-					found = true;
-					if (args.size() >= 2 && UniString{ args[1].String, args[1].Length, false } == "/info") {
-						console.Write(e.description);
-						console.Write("\n");
+					if (args.size() >= 2) {
+						UniString arg1{ args[1].String, args[1].Length, false };
+						if (arg1 == "/info") {
+							console.Write(e.description);
+							console.Write("\n");
+							return true;
+						}
+						else if (arg1 == "/pin") {
+							console.PinCommand(cmdName);
+							console.Write("Pinned command: ");
+							console.Write(cmdName);
+							console.Write("\n");
+							return true;
+						}
+						else if (arg1 == "/unpin") {
+							console.UnpinCommand();
+							console.Write("Unpinned command.");
+							console.Write("\n");
+							return true;
+						}
 					}
-					else
-						e.callback(console, args);
+					e.callback(console, args);
+					return true;
 				}
-				if (found)
-					break;
 			}
-			if (found)
-				break;
 		}
-		return found;
+		return false;
 	});
 }
 

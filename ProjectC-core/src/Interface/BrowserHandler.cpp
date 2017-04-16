@@ -2,6 +2,7 @@
 #include "Detail/ProcessMessageTypes.h"
 #include "GUIContext.h"
 #include "../ThreadManager.h"
+#include "../Logging.h"
 
 bool ProjectC::Interface::BrowserHandler::DoClose(CefRefPtr<CefBrowser> browser)
 {
@@ -26,13 +27,15 @@ void ProjectC::Interface::BrowserHandler::OnLoadEnd(CefRefPtr<CefBrowser> browse
 
 void ProjectC::Interface::BrowserHandler::OnLoadError(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, ErrorCode errorCode, const CefString& errorText, const CefString& failedUrl)
 {
-	LOG_WARN("Failed to load: ", failedUrl, ", because: ", errorText, "(", errorCode, ")");
+	PROJC_LOG(WARN, "Failed to load: ", failedUrl, ", because: ", errorText, "(", errorCode, ")");
 }
 
 bool ProjectC::Interface::BrowserHandler::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser, CefProcessId source_process, CefRefPtr<CefProcessMessage> message)
 {
+	PROJC_LOG(NORMAL, "ProcessMessage: ", source_process, ", ", message->GetName(), ", ", message->GetArgumentList()->GetSize());
+
 	auto argsList = message->GetArgumentList();
-	if (source_process == PID_RENDERER && argsList->GetSize() > 0 && argsList->GetType(0) == VTYPE_INT) {
+	if (source_process == PID_RENDERER && message->IsValid() && message->GetName() == Detail::ProcessMessageName) {
 		switch (argsList->GetInt(0)) {
 		case (int32_t)Detail::BrowserProcessMessageType::EXEC_MODULE_LISTENER:
 			GUIContext::RunOnGUIThread([this, message]() {
@@ -50,7 +53,7 @@ bool ProjectC::Interface::BrowserHandler::OnProcessMessageReceived(CefRefPtr<Cef
 							iter->second(argsList->GetValue(3));
 						}
 						catch (const std::exception& ex) {
-							LOG_WARN("Exception occurred: ", ex.what());
+							PROJC_LOG(WARN, "Exception occurred: ", ex.what());
 						}
 					}
 				}
@@ -67,7 +70,7 @@ bool ProjectC::Interface::BrowserHandler::OnProcessMessageReceived(CefRefPtr<Cef
 				int32_t callbackId = argsList->GetInt(2);
 				UniString str = std::get<0>(currentModule)->JSGetStringResource(argsList->GetValue(3));
 
-				auto processMsg = CefProcessMessage::Create("");
+				auto processMsg = CefProcessMessage::Create(Detail::ProcessMessageName);
 				argsList = processMsg->GetArgumentList();
 				argsList->SetInt(0, static_cast<int32_t>(Detail::RenderProcessMessageType::STR_RESOURCE_RESPONSE));
 				argsList->SetString(1, str);
@@ -84,7 +87,7 @@ bool ProjectC::Interface::BrowserHandler::OnProcessMessageReceived(CefRefPtr<Cef
 			for (size_t i = 1; i < argsList->GetSize(); ++i) {
 				StringUtils::Concatenate(ss, argsList->GetString(i));
 			}
-			App::Inst().Log(LogType::NORMAL, ss.str());
+			Logging::LogMessage{ ss.str(), Logging::LogType::NORMAL };
 		}
 		return true;
 		case (int32_t)Detail::BrowserProcessMessageType::ON_EXECUTE:
@@ -99,7 +102,7 @@ bool ProjectC::Interface::BrowserHandler::OnProcessMessageReceived(CefRefPtr<Cef
 					std::get<0>(currentModule)->JSOnExecute(argsList->GetValue(2));
 				}
 				catch (const std::exception& ex) {
-					LOG_WARN("Exception occurred: ", ex.what());
+					PROJC_LOG(WARN, "Exception occurred: ", ex.what());
 				}
 			});
 			return true;
@@ -115,7 +118,7 @@ bool ProjectC::Interface::BrowserHandler::OnProcessMessageReceived(CefRefPtr<Cef
 						return;
 					}
 				}
-				LOG_WARN("Could not find a callback with id ", id);
+				PROJC_LOG(WARN, "Could not find a callback with id ", id);
 			});
 			return true;
 		default:

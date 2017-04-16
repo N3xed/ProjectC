@@ -2,7 +2,7 @@
 
 #include "WindowWin.h"
 #include "WindowManagerWin.h"
-#include "../../../App.h"
+#include "../../../Logging.h"
 #include "../../../Utils/String.h"
 #include "BrowserWindowWin.h"
 
@@ -42,7 +42,7 @@ ProjectC::Interface::Detail::WindowWin* ProjectC::Interface::Detail::WindowWin::
 		NULL
 	);
 	if (handle == NULL) {
-		LOG_FATAL("CreateWindowEx failed: ", GetLastErrorString());
+		PROJC_LOG(FATAL, "CreateWindowEx failed: ", GetLastErrorString());
 		return nullptr;
 	}
 	return new WindowWin(handle);
@@ -58,12 +58,12 @@ void ProjectC::Interface::Detail::WindowWin::Show(bool show /*= true*/)
 	switch (show) {
 	case true:
 		if (!ShowWindowAsync(m_handle, SW_SHOW))
-			LOG_FATAL("ShowWindowAsync failed: ", GetLastErrorString());
+			PROJC_LOG(FATAL, "ShowWindowAsync failed: ", GetLastErrorString());
 		OnShowChanged()(*this, true);
 		break;
 	case false:
 		if (!ShowWindowAsync(m_handle, SW_HIDE))
-			LOG_FATAL("ShowWindowAsync failed: ", GetLastErrorString());
+			PROJC_LOG(FATAL, "ShowWindowAsync failed: ", GetLastErrorString());
 		OnShowChanged()(*this, false);
 		break;
 	}
@@ -72,31 +72,31 @@ void ProjectC::Interface::Detail::WindowWin::Show(bool show /*= true*/)
 void ProjectC::Interface::Detail::WindowWin::Raise()
 {
 	if (!BringWindowToTop(m_handle))
-		LOG_FATAL("BringWindowToTop failed:", GetLastErrorString());
+		PROJC_LOG(FATAL, "BringWindowToTop failed:", GetLastErrorString());
 }
 
 void ProjectC::Interface::Detail::WindowWin::Mimimize()
 {
 	if (!ShowWindowAsync(m_handle, SW_MINIMIZE))
-		LOG_FATAL("ShowWindowAsync failed: ", GetLastErrorString());
+		PROJC_LOG(FATAL, "ShowWindowAsync failed: ", GetLastErrorString());
 }
 
 void ProjectC::Interface::Detail::WindowWin::Maximize()
 {
 	if (!ShowWindowAsync(m_handle, SW_MAXIMIZE))
-		LOG_FATAL("ShowWindowAsync failed: ", GetLastErrorString());
+		PROJC_LOG(FATAL, "ShowWindowAsync failed: ", GetLastErrorString());
 }
 
 void ProjectC::Interface::Detail::WindowWin::Restore()
 {
 	if (!ShowWindowAsync(m_handle, SW_RESTORE))
-		LOG_FATAL("ShowWindowAsync failed: ", GetLastErrorString());
+		PROJC_LOG(FATAL, "ShowWindowAsync failed: ", GetLastErrorString());
 }
 
 void ProjectC::Interface::Detail::WindowWin::SetTitle(UniString const& title)
 {
 	if (!SetWindowText(m_handle, title.c_str()))
-		LOG_FATAL("SetWindowText failed: ", GetLastErrorString());
+		PROJC_LOG(FATAL, "SetWindowText failed: ", GetLastErrorString());
 }
 
 void ProjectC::Interface::Detail::WindowWin::CenterOnScreen()
@@ -105,7 +105,7 @@ void ProjectC::Interface::Detail::WindowWin::CenterOnScreen()
 	MONITORINFO mtrInfo;
 	mtrInfo.cbSize = sizeof(MONITORINFO);
 	if (!::GetMonitorInfoW(MonitorFromWindow(m_handle, MONITOR_DEFAULTTONEAREST), &mtrInfo)) {
-		LOG_FATAL("GetMonitorInfo failed: ", GetLastErrorString());
+		PROJC_LOG(FATAL, "GetMonitorInfo failed: ", GetLastErrorString());
 		return;
 	}
 	SetPosition(Point{
@@ -118,12 +118,12 @@ void ProjectC::Interface::Detail::WindowWin::CenterOnParent()
 {
 	HWND wndHandle = ::GetParent(m_handle);
 	if (wndHandle == NULL) {
-		LOG_FATAL("GetParent failed: ", GetLastErrorString());
+		PROJC_LOG(FATAL, "GetParent failed: ", GetLastErrorString());
 		return;
 	}
 	RECT rect;
 	if (!GetWindowRect(wndHandle, &rect)) {
-		LOG_FATAL("GetWindowRect failed: ", GetLastErrorString());
+		PROJC_LOG(FATAL, "GetWindowRect failed: ", GetLastErrorString());
 		return;
 	}
 	Size size = GetSize();
@@ -163,19 +163,19 @@ ProjectC::Interface::FullscreenMode ProjectC::Interface::Detail::WindowWin::GetF
 void ProjectC::Interface::Detail::WindowWin::SetSize(const Size& size)
 {
 	if (!SetWindowPos(m_handle, HWND_TOPMOST, 0, 0, size.x, size.y, SWP_ASYNCWINDOWPOS | SWP_NOZORDER | SWP_NOMOVE | SWP_NOSENDCHANGING))
-		LOG_FATAL("SetWindowPos failed: ", GetLastErrorString());
+		PROJC_LOG(FATAL, "SetWindowPos failed: ", GetLastErrorString());
 }
 
 void ProjectC::Interface::Detail::WindowWin::SetRect(const Rect& rect)
 {
 	if (!SetWindowPos(m_handle, HWND_TOPMOST, rect.x, rect.y, rect.width, rect.height, SWP_ASYNCWINDOWPOS | SWP_NOZORDER))
-		LOG_FATAL("SetWindowPos failed: ", GetLastErrorString());
+		PROJC_LOG(FATAL, "SetWindowPos failed: ", GetLastErrorString());
 }
 
 void ProjectC::Interface::Detail::WindowWin::SetPosition(const Point& point)
 {
 	if (!SetWindowPos(m_handle, HWND_TOPMOST, point.x, point.y, 0, 0, SWP_ASYNCWINDOWPOS | SWP_NOZORDER | SWP_NOSIZE))
-		LOG_FATAL("SetWindowPos failed: ", GetLastErrorString());
+		PROJC_LOG(FATAL, "SetWindowPos failed: ", GetLastErrorString());
 }
 
 void ProjectC::Interface::Detail::WindowWin::SetClientSize(const Size& size)
@@ -189,7 +189,7 @@ ProjectC::Interface::Size ProjectC::Interface::Detail::WindowWin::GetSize() cons
 {
 	RECT rect;
 	if (!GetWindowRect(m_handle, &rect))
-		LOG_FATAL("GetWindowRect failed: ", GetLastErrorString());
+		PROJC_LOG(FATAL, "GetWindowRect failed: ", GetLastErrorString());
 	return Size{ rect.right - rect.left, rect.bottom - rect.top };
 }
 
@@ -197,7 +197,7 @@ ProjectC::Interface::Size ProjectC::Interface::Detail::WindowWin::GetClientSize(
 {
 	RECT rect;
 	if (!GetClientRect(m_handle, &rect))
-		LOG_FATAL("GetWindowRect failed: ", GetLastErrorString());
+		PROJC_LOG(FATAL, "GetWindowRect failed: ", GetLastErrorString());
 	return Size{ rect.right, rect.bottom };
 }
 
@@ -205,7 +205,7 @@ ProjectC::Interface::Point ProjectC::Interface::Detail::WindowWin::GetPosition()
 {
 	RECT rect;
 	if (!GetWindowRect(m_handle, &rect))
-		LOG_FATAL("GetWindowRect failed: ", GetLastErrorString());
+		PROJC_LOG(FATAL, "GetWindowRect failed: ", GetLastErrorString());
 	return Point{ rect.left, rect.top };
 }
 
@@ -213,7 +213,7 @@ ProjectC::Interface::Rect ProjectC::Interface::Detail::WindowWin::GetRect() cons
 {
 	RECT rect;
 	if (!GetWindowRect(m_handle, &rect))
-		LOG_FATAL("GetWindowRect failed: ", GetLastErrorString());
+		PROJC_LOG(FATAL, "GetWindowRect failed: ", GetLastErrorString());
 	return Rect{ rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top };
 }
 
@@ -228,7 +228,7 @@ ProjectC::Interface::MonitorInfo ProjectC::Interface::Detail::WindowWin::GetMoni
 	MONITORINFOEX monitorInfo{};
 	monitorInfo.cbSize = sizeof(MONITORINFOEX);
 	if (!::GetMonitorInfoW(monitor, &monitorInfo))
-		LOG_FATAL("GetMonitorInfo failed: ", GetLastErrorString());
+		PROJC_LOG(FATAL, "GetMonitorInfo failed: ", GetLastErrorString());
 
 	return MonitorInfo{
 		Rect{

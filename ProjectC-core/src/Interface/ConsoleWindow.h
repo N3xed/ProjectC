@@ -2,7 +2,7 @@
 #include "../InvocationList.h"
 #include "../HandlerList.h"
 #include "../Utils/String.h"
-#include "../Logger.h"
+#include "../Logging.h"
 
 
 namespace ProjectC::Interface {
@@ -30,6 +30,7 @@ namespace ProjectC::Interface {
 		CloseListenerList m_closeListeners;
 	
 		std::vector<CommandInfo> m_commands;
+		UniString m_pinnedCommand;
 	public:
 		ConsoleWindow();
 		virtual ~ConsoleWindow() {}
@@ -69,6 +70,13 @@ namespace ProjectC::Interface {
 		/// </summary>
 		/// <returns>All added commands.</returns>
 		std::vector<CommandInfo>& GetCommands() { return m_commands; }
+
+		void PinCommand(const UniString& cmdName) {
+			m_pinnedCommand = cmdName;
+		}
+		void UnpinCommand() {
+			m_pinnedCommand.clear();
+		}
 
 		static ConsoleWindow* Create(const UniString& title, const UniString& delimiter = " ");
 	};

@@ -4,7 +4,7 @@
 
 void ProjectC::Interface::Detail::StatusbarImpl::RemoveChilds()
 {
-	auto processMsg = CefProcessMessage::Create("");
+	auto processMsg = CefProcessMessage::Create(ProcessMessageName);
 	auto argsList = processMsg->GetArgumentList();
 
 	argsList->SetInt(0, static_cast<int32_t>(Detail::RenderProcessMessageType::STATUSBAR_REMOVE_ALL_CHILDS));
@@ -14,7 +14,7 @@ void ProjectC::Interface::Detail::StatusbarImpl::RemoveChilds()
 
 void ProjectC::Interface::Detail::StatusbarImpl::RemoveChilds(const UniString& attributeName, const UniString& value)
 {
-	auto processMsg = CefProcessMessage::Create("");
+	auto processMsg = CefProcessMessage::Create(ProcessMessageName);
 	auto argsList = processMsg->GetArgumentList();
 
 	argsList->SetInt(0, static_cast<int32_t>(Detail::RenderProcessMessageType::STATUSBAR_REMOVE_CHILDS_BY_ATTR));
@@ -26,7 +26,7 @@ void ProjectC::Interface::Detail::StatusbarImpl::RemoveChilds(const UniString& a
 
 void ProjectC::Interface::Detail::StatusbarImpl::RemoveChilds(const UniString& className)
 {
-	auto processMsg = CefProcessMessage::Create("");
+	auto processMsg = CefProcessMessage::Create(ProcessMessageName);
 	auto argsList = processMsg->GetArgumentList();
 
 	argsList->SetInt(0, static_cast<int32_t>(Detail::RenderProcessMessageType::STATUSBAR_REMOVE_CHILDS_BY_CLASS));
@@ -37,7 +37,7 @@ void ProjectC::Interface::Detail::StatusbarImpl::RemoveChilds(const UniString& c
 
 void ProjectC::Interface::Detail::StatusbarImpl::RemoveChild(const UniString& id)
 {
-	auto processMsg = CefProcessMessage::Create("");
+	auto processMsg = CefProcessMessage::Create(ProcessMessageName);
 	auto argsList = processMsg->GetArgumentList();
 
 	argsList->SetInt(0, static_cast<int32_t>(Detail::RenderProcessMessageType::STATUSBAR_REMOVE_CHILD_BY_ID));
@@ -48,7 +48,7 @@ void ProjectC::Interface::Detail::StatusbarImpl::RemoveChild(const UniString& id
 
 void ProjectC::Interface::Detail::StatusbarImpl::AddChild(const UniString& htmlCode)
 {
-	auto processMsg = CefProcessMessage::Create("");
+	auto processMsg = CefProcessMessage::Create(ProcessMessageName);
 	auto argsList = processMsg->GetArgumentList();
 
 	argsList->SetInt(0, static_cast<int32_t>(Detail::RenderProcessMessageType::STATUSBAR_ADD_CHILD));
@@ -59,7 +59,7 @@ void ProjectC::Interface::Detail::StatusbarImpl::AddChild(const UniString& htmlC
 
 void ProjectC::Interface::Detail::StatusbarImpl::PushStatus(const UniString& str)
 {
-	auto processMsg = CefProcessMessage::Create("");
+	auto processMsg = CefProcessMessage::Create(ProcessMessageName);
 	auto argsList = processMsg->GetArgumentList();
 
 	argsList->SetInt(0, static_cast<int32_t>(Detail::RenderProcessMessageType::STATUSBAR_PUSH_STATUS));
@@ -70,7 +70,7 @@ void ProjectC::Interface::Detail::StatusbarImpl::PushStatus(const UniString& str
 
 void ProjectC::Interface::Detail::StatusbarImpl::Show(bool show /*= true*/)
 {
-	auto processMsg = CefProcessMessage::Create("");
+	auto processMsg = CefProcessMessage::Create(ProcessMessageName);
 	auto argsList = processMsg->GetArgumentList();
 
 	argsList->SetInt(0, static_cast<int32_t>(Detail::RenderProcessMessageType::SHOW));

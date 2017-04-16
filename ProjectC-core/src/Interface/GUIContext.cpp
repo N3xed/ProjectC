@@ -1,5 +1,4 @@
 #include "GUIContext.h"
-#include "../Logger.h"
 #include "Resources/ResourceManager.h"
 #include "Detail/SchemeHandlerFactory.h"
 #include <mutex>
@@ -21,7 +20,9 @@ CefRefPtr<CefApp> ProjectC::Interface::GUIContext::GetCefAppForSubProcess()
 		}
 		IMPLEMENT_REFCOUNTING(ProcessAppImpl);
 	};
-	static ProcessAppImpl* processApp = new ProcessAppImpl();
+	static ProcessAppImpl* processApp;
+	if (!processApp)
+		processApp = new ProcessAppImpl();
 	return processApp;
 }
 
@@ -35,7 +36,7 @@ ProjectC::Interface::GUIContext::GUIContext(CefMainArgs& args)
 
 	CefSettings settings{};
 	settings.no_sandbox = true;
-	//settings.single_process = true;
+	settings.ignore_certificate_errors = STATE_ENABLED;
 	if (!CefInitialize(args, settings, s_instance, nullptr)) {
 		throw std::exception("Failed to initialize CEF");
 	}
@@ -43,7 +44,7 @@ ProjectC::Interface::GUIContext::GUIContext(CefMainArgs& args)
 	m_consoleWindow = std::unique_ptr<Interface::ConsoleWindow>(Interface::ConsoleWindow::Create("Console"));
 	m_consoleWindow->Hide();
 	m_consoleWindow->AddCommand("refresh", "Refreshes the browser.", [](Interface::ConsoleWindow& console, const Interface::ConsoleWindow::SubStringVector& args) {
-		Interface::BrowserWindow* wnd;
+		std::shared_ptr<BrowserWindow> wnd{ nullptr };
 		if (args.size() < 2)
 			wnd = App::WndMgr().GetWindow(static_cast<size_t>(0));
 		else
@@ -59,13 +60,18 @@ ProjectC::Interface::GUIContext::GUIContext(CefMainArgs& args)
 			}
 		}
 		if (wnd) {
-			wnd->GetBrowser().Reload();
+			std::weak_ptr<BrowserWindow> weakPtr = wnd;
+			RunOnGUIThread([weakPtr]() {
+				auto wndPtr = weakPtr.lock();
+				if (wndPtr)
+					wndPtr->GetBrowser().Reload();
+			});
 			return true;
 		}
 		return false;
 	});
 	m_consoleWindow->AddCommand("showDevTools", "Shows the development tools window.", [](Interface::ConsoleWindow& console, const Interface::ConsoleWindow::SubStringVector& args) {
-		Interface::BrowserWindow* wnd;
+		std::shared_ptr<BrowserWindow> wnd{ nullptr };
 		if (args.size() < 2)
 			wnd = App::WndMgr().GetWindow(static_cast<size_t>(0));
 		else
@@ -81,7 +87,12 @@ ProjectC::Interface::GUIContext::GUIContext(CefMainArgs& args)
 			}
 		}
 		if (wnd) {
-			wnd->ShowDevTools();
+			std::weak_ptr<BrowserWindow> weakPtr = wnd;
+			RunOnGUIThread([weakPtr]() {
+				auto wndPtr = weakPtr.lock();
+				if (wndPtr)
+					wndPtr->ShowDevTools();
+			});
 			return true;
 		}
 		return false;
@@ -90,15 +101,54 @@ ProjectC::Interface::GUIContext::GUIContext(CefMainArgs& args)
 		App::Inst().Exit();
 		return true;
 	});
-
-	App::Inst().GetQueueLogger().SetHandler([this](const ILogger::LogInfo& log) {
-		if (this && m_consoleWindow) {
-			m_consoleWindow->Write(log.Message);
-			m_consoleWindow->Write("\n");
-			if (!m_consoleWindow->IsShown())
-				m_consoleWindow->Show(true);
+	m_consoleWindow->AddCommand("execJSCode", "Executes JavaScript code on the main frame of the browser.", [](Interface::ConsoleWindow& console, const Interface::ConsoleWindow::SubStringVector& args) {
+		if (args.size() < 3)
+			return false;
+		std::shared_ptr<BrowserWindow> wnd{ nullptr };
+		if (args.size() < 2)
+			wnd = App::WndMgr().GetWindow(static_cast<size_t>(0));
+		else
+		{
+			try {
+				size_t index = static_cast<size_t>(std::stoi(args[1].ToString()));
+				if (index < 0 || index > App::WndMgr().GetWindowCount())
+					return false;
+				wnd = App::WndMgr().GetWindow(static_cast<size_t>(index));
+			}
+			catch (const std::exception&) {
+				return false;
+			}
 		}
-		LOG(INFO) << log.Message;
+		if (wnd) {
+			std::weak_ptr<BrowserWindow> weakPtr = wnd;
+			std::stringstream ss;
+			for (size_t i = 2; i < args.size(); ++i) {
+				StringUtils::Concatenate(ss, args[i].ToString());
+			}
+			UniString str = ss.str();
+			RunOnGUIThread([weakPtr, str]() {
+				auto wndPtr = weakPtr.lock();
+				if (wndPtr)
+					wndPtr->ExecuteJSCode(str);
+			});
+			return true;
+		}
+		return true;
+	});
+
+
+	auto& logger = Logging::Logger::GetInstance();
+	logger.OnLog().Clear();
+	logger.OnLog().Add([this](const Logging::LogMessage& msg) {
+		LOG(INFO) << msg.Message;
+
+		if (m_consoleWindow) {
+			m_consoleWindow->Write(msg.Message);
+			m_consoleWindow->Write("\n");
+
+			if (!m_consoleWindow->IsShown())
+				m_consoleWindow->Show();
+		}
 	});
 }
 
@@ -113,15 +163,18 @@ void ProjectC::Interface::GUIContext::OnRegisterCustomSchemes(CefRefPtr<CefSchem
 
 void ProjectC::Interface::GUIContext::OnContextInitialized()
 {
-	Interface::WindowManager::RegisterSchemeHandlerFactories();
-
 	ResourceManager::GetInstance().AddResourceFromFile("root", "text/html", "D:/Projects/ProjectC/ProjectC-core/src/Interface/Resources/Pages/MainWindow.htm", false);
 	ResourceManager::GetInstance().AddResourceFromFile("rootCSS", "text/css", "D:/Projects/ProjectC/ProjectC-core/src/Interface/Resources/Pages/MainWindowStyle.css", false);
+	ResourceManager::GetInstance().AddResourceFromFile("rootJS", "text/javascript", "D:/Projects/ProjectC/ProjectC-core/src/Interface/Resources/Scripts/MainWindowScript.js", false);
+
+	if (!CefRegisterSchemeHandlerFactory(Detail::PageSchemeHandlerFactory::PageSchemeId, "", new Detail::PageSchemeHandlerFactory()))
+		PROJC_LOG(FATAL, "Could not register scheme factory.");
+	if (!CefRegisterSchemeHandlerFactory(Detail::ResourceSchemeHandlerFactory::ResourceSchemeId, "", new Detail::ResourceSchemeHandlerFactory()))
+		PROJC_LOG(FATAL, "Could not register scheme factory.");
 
 	BrowserWindow& window = Interface::WindowManager::CreateBrowserWindow("ProjectC", 1024, 720, nullptr);
 
 	window.GetWindow().Show(true);
-	window.GetBrowser().GetMainFrame()->LoadURL("page:root");
 }
 
 void ProjectC::Interface::GUIContext::DoRegisterCustomScheme(CefRefPtr<CefSchemeRegistrar> registrar)
@@ -142,7 +195,7 @@ bool ProjectC::Interface::GUIContext::Initialize(CefMainArgs& args)
 		new GUIContext(args);
 	}
 	catch (const std::exception& ex) {
-		LOG_FATAL(ex.what());
+		PROJC_LOG(FATAL, "Could not initialize GUIContext: ", ex.what());
 		return false;
 	}
 	return true;
@@ -166,20 +219,20 @@ void ProjectC::Interface::GUIContext::RunOnGUIThread(std::function<void()> func)
 			func();
 		}
 		catch (const std::exception& ex) {
-			LOG_WARN("Exception occurred: ", ex.what());
+			PROJC_LOG(WARN, "Exception occurred: ", ex.what());
 		}
 	}
 	else {
 		class FunctorTask : public CefTask {
 		public:
 			std::function<void()> Functor;
-			FunctorTask(std::function<void()> functor) : Functor(Functor) {}
+			FunctorTask(std::function<void()> functor) : Functor(functor) {}
 			virtual void Execute() override {
 				try {
 					Functor();
 				}
 				catch (const std::exception& ex) {
-					LOG_WARN("Exception occurred: ", ex.what());
+					PROJC_LOG(WARN, "Exception occurred: ", ex.what());
 				}
 			}
 			IMPLEMENT_REFCOUNTING(FunctorTask);

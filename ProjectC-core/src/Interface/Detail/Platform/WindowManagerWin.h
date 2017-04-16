@@ -9,7 +9,7 @@ namespace ProjectC::Interface::Detail {
 		static const wchar_t WINDOW_CLASS_NAME[];
 		static ATOM WINDOW_CLASS;
 
-		virtual BrowserWindow* DoGetWindow(WindowHandle handle) override;
+		virtual std::shared_ptr<BrowserWindow> DoGetWindow(WindowHandle handle) override;
 
 	protected:
 		virtual ~WindowManagerWin();

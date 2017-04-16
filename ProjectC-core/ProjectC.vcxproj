@@ -188,6 +188,7 @@
     <ClCompile Include="src\Interface\Detail\Platform\WindowWin.cpp" />
     <ClCompile Include="src\Interface\Localization\StringResources.cpp" />
     <ClCompile Include="src\Interface\WindowManager.cpp" />
+    <ClCompile Include="src\Logging.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Modules\DynamicLibrary.cpp" />
     <ClCompile Include="src\Modules\ExecutionManager.cpp" />
@@ -214,14 +215,15 @@
     <ClInclude Include="src\App.h" />
     <ClInclude Include="src\Interface\BrowserHandler.h" />
     <ClInclude Include="src\Interface\ConsoleWindow.h" />
+    <ClInclude Include="src\Interface\Detail\JSApp.hpp" />
     <ClInclude Include="src\Interface\Detail\FunctorTask.hpp" />
-    <ClInclude Include="src\Interface\Detail\JSAppImpl.hpp" />
     <ClInclude Include="src\Interface\Detail\Platform\BrowserHandlerWin.h" />
     <ClInclude Include="src\Interface\Detail\Platform\BrowserWindowWin.h" />
     <ClInclude Include="src\Interface\BrowserWindow.h" />
     <ClInclude Include="src\Interface\Detail\Platform\ConsoleWindowWin.h" />
     <ClInclude Include="src\Interface\Detail\Platform\WindowManagerWin.h" />
     <ClInclude Include="src\Interface\Detail\StatusbarImpl.h" />
+    <ClInclude Include="src\Interface\Detail\V8HandlerList.hpp" />
     <ClInclude Include="src\Interface\GUIContext.h" />
     <ClInclude Include="src\Interface\IStatusbar.h" />
     <ClInclude Include="src\Interface\IWindow.h" />
@@ -241,7 +243,7 @@
     <ClInclude Include="src\Interface\WindowManager.h" />
     <ClInclude Include="src\HandlerList.h" />
     <ClInclude Include="src\InvocationList.h" />
-    <ClInclude Include="src\Logger.h" />
+    <ClInclude Include="src\Logging.h" />
     <ClInclude Include="src\Modules\DynamicLibrary.h" />
     <ClInclude Include="src\Modules\ExecutionManager.h" />
     <ClInclude Include="src\Modules\LibraryManager.h" />
@@ -281,6 +283,7 @@
       <DeploymentContent>true</DeploymentContent>
     </None>
     <None Include="src\Interface\Resources\Pages\MainWindowStyle.css" />
+    <None Include="src\Interface\Resources\Scripts\MainWindowScript.js" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

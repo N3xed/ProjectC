@@ -59,3 +59,30 @@ body{
 .navButtonDisabled:active{
     outline: none;
 }
+.arrow{
+    transform: rotate(-45deg);
+    border: solid black;
+    border-width: 0 4px 4px 0;
+    width: 10px;
+    height: 10px;
+}
+
+@keyframes fadeInNavigation{
+    from{
+        opacity: 0.4;
+        width: 0px;
+    }
+    to{
+        opacity: 1;
+        width: auto;
+    }
+}
+.navFadeInAnimation{
+    display: block;
+    height: 30px;
+    animation-name: fadeInNavigation;
+    animation-direction: normal;
+    animation-iteration-count: 1;
+    animation-duration: 0.4s;
+    animation-fill-mode:forwards;
+}

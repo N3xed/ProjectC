@@ -1,13 +1,13 @@
 #include "SchemeHandlerFactory.h"
 #include "../BrowserHandler.h"
 #include "ResourceHandlers.h"
-#include "../../App.h"
+#include "../../Logging.h"
 
 const char ProjectC::Interface::Detail::PageSchemeHandlerFactory::PageSchemeId[] = "page";
 
 CefRefPtr<CefResourceHandler> ProjectC::Interface::Detail::PageSchemeHandlerFactory::Create(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& scheme_name, CefRefPtr<CefRequest> request)
 {
-	LOG_NORMAL(scheme_name, ", ", request->GetMethod(), ", ", request->GetResourceType(), ", ", request->GetURL());
+	PROJC_LOG(NORMAL, scheme_name, ", ", request->GetMethod(), ", ", request->GetResourceType(), ", ", request->GetURL());
 
 	if (BrowserHandler* handler = dynamic_cast<BrowserHandler*>(browser->GetHost()->GetClient().get())) {
 		BasicUniString temp;
@@ -30,7 +30,7 @@ const char ProjectC::Interface::Detail::ResourceSchemeHandlerFactory::ResourceSc
 
 CefRefPtr<CefResourceHandler> ProjectC::Interface::Detail::ResourceSchemeHandlerFactory::Create(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& scheme_name, CefRefPtr<CefRequest> request)
 {
-	LOG_NORMAL(scheme_name, ", ", request->GetMethod(), ", ", request->GetResourceType(), ", ", request->GetURL());
+	PROJC_LOG(NORMAL, scheme_name, ", ", request->GetMethod(), ", ", request->GetResourceType(), ", ", request->GetURL());
 
 	if (BrowserHandler* handler = dynamic_cast<BrowserHandler*>(browser->GetHost()->GetClient().get())) {
 		BasicUniString temp;
@@ -64,7 +64,10 @@ CefRefPtr<CefResourceHandler> ProjectC::Interface::Detail::ResourceSchemeHandler
 					return new ManagerResourceHandler(resDelegate);
 				}
 			case RT_SCRIPT:
-				return new RootResourceHandler<1>();
+				//return new RootResourceHandler<1>();
+				if (ResourceDelegate* resDelegate = ResourceManager::GetInstance().GetDelegate("rootJS")) {
+					return new ManagerResourceHandler(resDelegate);
+				}
 			default:
 				break;
 			}

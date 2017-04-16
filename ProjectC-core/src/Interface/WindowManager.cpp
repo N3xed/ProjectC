@@ -13,7 +13,7 @@ void ProjectC::Interface::WindowManager::AddWindow(BrowserWindow* window)
 
 void ProjectC::Interface::WindowManager::RemoveWindow(BrowserWindow* window)
 {
-	m_windows.remove_if([window](std::unique_ptr<BrowserWindow>& e) {
+	m_windows.remove_if([window](std::shared_ptr<BrowserWindow>& e) {
 		return e.get() == window;
 	});
 	if (m_windows.empty()) {
@@ -29,55 +29,55 @@ void ProjectC::Interface::WindowManager::RemoveWindow(BrowserWindow* window)
 	}
 }
 
-ProjectC::Interface::BrowserWindow* ProjectC::Interface::WindowManager::DoGetWindow(WindowHandle handle)
+std::shared_ptr<ProjectC::Interface::BrowserWindow> ProjectC::Interface::WindowManager::DoGetWindow(WindowHandle handle)
 {
 	for (auto& e : m_windows) {
 		if (e->GetWindow().GetNativeHandle() == handle) {
-			return e.get();
+			return e;
 		}
 	}
 	return nullptr;
 }
 
-ProjectC::Interface::BrowserWindow* ProjectC::Interface::WindowManager::DoGetWindow(IWindow& window)
+std::shared_ptr<ProjectC::Interface::BrowserWindow> ProjectC::Interface::WindowManager::DoGetWindow(IWindow& window)
 {
 	return DoGetWindow(window.GetNativeHandle());
 }
 
-ProjectC::Interface::BrowserWindow* ProjectC::Interface::WindowManager::DoGetWindow(CefRefPtr<CefBrowser> browser)
+std::shared_ptr<ProjectC::Interface::BrowserWindow> ProjectC::Interface::WindowManager::DoGetWindow(CefRefPtr<CefBrowser> browser)
 {
 	for (auto& e : m_windows) {
 		if (e->GetBrowser().IsSame(browser))
-			return e.get();
+			return e;
 	}
 	return nullptr;
 }
 
-ProjectC::Interface::BrowserWindow* ProjectC::Interface::WindowManager::GetWindow(WindowHandle handle)
+std::shared_ptr<ProjectC::Interface::BrowserWindow> ProjectC::Interface::WindowManager::GetWindow(WindowHandle handle)
 {
 	std::lock_guard<std::mutex> guard{ m_lock };
 	return DoGetWindow(handle);
 }
 
-ProjectC::Interface::BrowserWindow* ProjectC::Interface::WindowManager::GetWindow(IWindow& window)
+std::shared_ptr<ProjectC::Interface::BrowserWindow> ProjectC::Interface::WindowManager::GetWindow(IWindow& window)
 {
 	std::lock_guard<std::mutex> guard{ m_lock };
 	return DoGetWindow(window);
 }
 
-ProjectC::Interface::BrowserWindow* ProjectC::Interface::WindowManager::GetWindow(CefRefPtr<CefBrowser> browser)
+std::shared_ptr<ProjectC::Interface::BrowserWindow> ProjectC::Interface::WindowManager::GetWindow(CefRefPtr<CefBrowser> browser)
 {
 	std::lock_guard<std::mutex> guard{ m_lock };
 	return DoGetWindow(browser);
 }
 
-ProjectC::Interface::BrowserWindow* ProjectC::Interface::WindowManager::GetWindow(size_t index)
+std::shared_ptr<ProjectC::Interface::BrowserWindow> ProjectC::Interface::WindowManager::GetWindow(size_t index)
 {
 	std::lock_guard<std::mutex> guard{ m_lock };
 	if (index > m_windows.size())
 		return nullptr;
 
-	return std::next(m_windows.begin(), index)->get();
+	return *std::next(m_windows.begin(), index);
 }
 
 bool ProjectC::Interface::WindowManager::CloseAllWindows(bool force)
@@ -122,14 +122,6 @@ void ProjectC::Interface::WindowManager::CloseAllWindowsAsync(bool force, std::f
 
 ProjectC::Interface::WindowManager::WindowManager()
 { }
-
-void ProjectC::Interface::WindowManager::RegisterSchemeHandlerFactories()
-{
-	if (!CefRegisterSchemeHandlerFactory(Detail::PageSchemeHandlerFactory::PageSchemeId, "", new Detail::PageSchemeHandlerFactory()))
-		LOG_FATAL("Could not register scheme factory.");
-	if (!CefRegisterSchemeHandlerFactory(Detail::ResourceSchemeHandlerFactory::ResourceSchemeId, "", new Detail::ResourceSchemeHandlerFactory()))
-		LOG_FATAL("Could not register scheme factory.");
-}
 
 #if defined(OS_WIN)
 #include "Detail/Platform/WindowManagerWin.h"

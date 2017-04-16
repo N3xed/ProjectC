@@ -1,6 +1,7 @@
 #include "BrowserWindow.h"
 #include "Detail/ProcessMessageTypes.h"
 #include "../App.h"
+#include "../Logging.h"
 
 #include <cef/include/cef_browser.h>
 #include <cef/include/cef_client.h>
@@ -25,7 +26,7 @@ void ProjectC::Interface::BrowserWindow::PushLayer(std::shared_ptr<IGUIModule> g
 	int moduleId = MakeNewId((m_modules.empty()) ? 0 : m_modules.back().GUIModuleId);
 	m_modules.emplace_back(module, guiModule, moduleId);
 
-	auto processMsg = CefProcessMessage::Create("");
+	auto processMsg = CefProcessMessage::Create(Detail::ProcessMessageName);
 	auto argsList = processMsg->GetArgumentList();
 	argsList->SetInt(0, static_cast<int32_t>(Detail::RenderProcessMessageType::MODULE_CHANGED));
 	argsList->SetString(1, guiModule->GetName());
@@ -41,7 +42,7 @@ void ProjectC::Interface::BrowserWindow::PopLayer()
 	m_modules.pop_back();
 	auto& module = m_modules.back();
 
-	auto processMsg = CefProcessMessage::Create("");
+	auto processMsg = CefProcessMessage::Create(Detail::ProcessMessageName);
 	auto argsList = processMsg->GetArgumentList();
 	argsList->SetInt(0, static_cast<int32_t>(Detail::RenderProcessMessageType::MODULE_CHANGED));
 	argsList->SetString(1, module.GUIModule->GetName());
@@ -78,7 +79,7 @@ void ProjectC::Interface::BrowserWindow::SetNavigationVisible(bool value)
 {
 	assert(CefCurrentlyOn(TID_UI));
 
-	auto processMsg = CefProcessMessage::Create("");
+	auto processMsg = CefProcessMessage::Create(Detail::ProcessMessageName);
 	auto argsList = processMsg->GetArgumentList();
 
 	argsList->SetInt(0, static_cast<int32_t>(Detail::RenderProcessMessageType::SHOW));
@@ -101,19 +102,35 @@ bool ProjectC::Interface::BrowserWindow::IsHomeScreen() const
 
 void ProjectC::Interface::BrowserWindow::ShowDevTools()
 {
-	assert(CefCurrentlyOn(TID_UI));
-
-	CefWindowInfo info;
+	CefWindowInfo info{};
 	info.SetAsPopup(GetWindow().GetNativeHandle(), "DevTools");
-	CefBrowserSettings settings{};
-	GetBrowser().GetHost()->ShowDevTools(info, nullptr, settings, CefPoint{});
+
+
+	class DevToolsClient : public CefClient, CefLoadHandler {
+	public:
+		virtual CefRefPtr<CefLoadHandler> GetLoadHandler() override { return this; }
+
+		virtual void OnLoadError(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, ErrorCode errorCode, const CefString& errorText, const CefString& failedUrl) override
+		{
+			PROJC_LOG(WARN, "Failed to load '", failedUrl, "' (ERROR_CODE=", static_cast<int32_t>(errorCode), ")");
+		}
+
+		virtual void OnLoadStart(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, TransitionType transition_type) override
+		{
+			PROJC_LOG(NORMAL, "Started loading: ", frame->GetURL());
+		}
+
+		IMPLEMENT_REFCOUNTING(DevToolsClient);
+	};
+
+	GetBrowser().GetHost()->ShowDevTools(info, new DevToolsClient(), CefBrowserSettings{}, CefPoint{});
 }
 
 void ProjectC::Interface::BrowserWindow::ExecuteJSListener(const UniString& name, CefRefPtr<CefValue> arg /*= nullptr*/)
 {
 	assert(CefCurrentlyOn(TID_UI));
 
-	auto processMsg = CefProcessMessage::Create("");
+	auto processMsg = CefProcessMessage::Create(Detail::ProcessMessageName);
 	auto argsList = processMsg->GetArgumentList();
 	argsList->SetInt(0, static_cast<int32_t>(Detail::RenderProcessMessageType::EXEC_JS_LISTENER));
 	argsList->SetString(1, name);
@@ -135,11 +152,23 @@ void ProjectC::Interface::BrowserWindow::Query(QueryType query, std::function<vo
 	int32_t id = MakeNewId(std::get<0>(m_queryCallbacks.front()));
 	m_queryCallbacks.emplace_front(std::make_tuple(id, callback));
 
-	auto processMsg = CefProcessMessage::Create("");
+	auto processMsg = CefProcessMessage::Create(Detail::ProcessMessageName);
 	auto argsList = processMsg->GetArgumentList();
 	argsList->SetInt(0, static_cast<int32_t>(Detail::RenderProcessMessageType::QUERY));
 	argsList->SetInt(1, static_cast<int32_t>(query));
 	argsList->SetInt(2, id);
+
+	GetBrowser().SendProcessMessage(PID_RENDERER, processMsg);
+}
+
+void ProjectC::Interface::BrowserWindow::ExecuteJSCode(const UniString& code)
+{
+	assert(CefCurrentlyOn(TID_UI));
+
+	auto processMsg = CefProcessMessage::Create(Detail::ProcessMessageName);
+	auto argsList = processMsg->GetArgumentList();
+	argsList->SetInt(0, static_cast<int32_t>(Detail::RenderProcessMessageType::EXEC_JS_CODE));
+	argsList->SetString(1, code);
 
 	GetBrowser().SendProcessMessage(PID_RENDERER, processMsg);
 }

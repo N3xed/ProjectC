@@ -18,19 +18,19 @@ ProjectC::Interface::Detail::BrowserWindowWin::BrowserWindowWin(WindowWin* windo
 	wndInfo.SetAsChild(window->GetNativeHandle(), rect);
 
 	CefBrowserSettings browserSettings;
-	browserSettings.plugins = STATE_DISABLED;
 	browserSettings.web_security = STATE_DISABLED;
+	browserSettings.plugins = STATE_DISABLED;
 
-	m_browser = CefBrowserHost::CreateBrowserSync(wndInfo, new BrowserHandlerWin(this), "", browserSettings, nullptr);
+	m_browser = CefBrowserHost::CreateBrowserSync(wndInfo, new BrowserHandlerWin(this), "page:root", browserSettings, nullptr);
 }
 
 ProjectC::Interface::Detail::BrowserWindowWin* ProjectC::Interface::Detail::BrowserWindowWin::Create(const UniString& title, int32_t x, int32_t y, int32_t width, int32_t height, HINSTANCE hInstance, WindowHandle parent /*= nullptr*/, bool defaultPos /*= false*/)
 {
-	if (auto result = new BrowserWindowWin(WindowWin::Create(title, x, y, width, height, hInstance, parent, defaultPos))) {
-		return result;
+	try{	
+		auto result = std::unique_ptr<BrowserWindowWin>(new BrowserWindowWin(WindowWin::Create(title, x, y, width, height, hInstance, parent, defaultPos)));
+		return result.release();
 	}
-	else {
-		delete result;
+	catch (const std::exception&) {
 		return nullptr;
 	}
 }

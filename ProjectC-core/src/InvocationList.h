@@ -87,6 +87,11 @@ namespace ProjectC {
 				last = iter;
 			}
 		}
+		void Clear() {
+			delete m_front;
+			m_front = new Node();
+			m_back = m_front;
+		}
 	};
 
 }

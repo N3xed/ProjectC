@@ -6,7 +6,7 @@
 #include "Modules/ModuleManager.h"
 #include "Modules/ExecutionManager.h"
 #include "Modules/LibraryManager.h"
-#include "Logger.h"
+#include "Logging.h"
 #include "Interface/Localization/LanguageHelper.h"
 #include "Interface/GUIContext.h"
 
@@ -18,7 +18,6 @@ namespace ProjectC {
 		Modules::ExecutionManager m_executionMgr;
 		Modules::LibraryManager m_libraryMgr;
 		Networking::ConnectionManager m_connectionMgr;
-		QueueLogger m_logger;
 		Interface::LanguageHelper m_langHelper;
 
 		static Application* s_instance;
@@ -44,11 +43,6 @@ namespace ProjectC {
 		virtual Interface::LanguageHelper& GetLanguageHelper() override {
 			return m_langHelper;
 		}
-		virtual QueueLogger& GetQueueLogger() override {
-			return m_logger;
-		}
-
-		virtual void Log(const std::string& msg, LogType type = static_cast<LogType>(0)) override;
 
 		static Application& GetInstance() {
 			return *s_instance;

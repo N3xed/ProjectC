@@ -8,39 +8,29 @@
 namespace ProjectC {
 	namespace StringUtils {
 
-		template<typename T, typename... Args>
-		static void Concatenate(std::stringstream& ss, const T& arg0, const Args&... args) {
+		template<typename CharType = char, typename T, typename... Args>
+		static void Concatenate(std::basic_stringstream<CharType>& ss, const T& arg0, const Args&... args) {
 			ss << arg0;
-			Concatenate(ss, args...);
+			Concatenate<CharType>(ss, args...);
 		}
-
-		template<typename... Args>
-		static void Concatenate(std::stringstream& ss, const UniString& arg0, const Args&... args) {
-			ss << arg0.ToString();
-			Concatenate(ss, args...);
-		}
-
-		template<typename T>
-		static void Concatenate(std::stringstream& ss, const T& arg) {
+		
+		template<typename CharType = char, typename T>
+		static void Concatenate(std::basic_stringstream<CharType>& ss, const T& arg) {
 			ss << arg;
 		}
-
-		static void Concatenate(std::stringstream& ss, const UniString& arg) {
-			ss << arg.ToString();
-		}
-
-		template<typename... Args>
-		static std::string Concatenate(Args... args) {
-			std::stringstream ss;
-			Concatenate(ss, args...);
+		
+		template<typename CharType = char, typename... Args>
+		static std::basic_string<CharType> Concatenate(Args... args) {
+			std::basic_stringstream<CharType> ss{};
+			Concatenate<CharType>(ss, args...);
 			return ss.str();
 		}
 		
-		template<typename... Args>
-		static std::string Append(const std::string& str, const Args&... args) {
-			std::stringstream ss;
+		template<typename CharType = char, typename... Args>
+		static std::basic_string<CharType> Append(const std::basic_string<CharType>& str, const Args&... args) {
+			std::basic_stringstream<CharType> ss{};
 			ss << str;
-			Concatenate(ss, args...);
+			Concatenate<CharType>(ss, args...);
 			return ss.str();
 		}
 
@@ -141,6 +131,24 @@ namespace ProjectC {
 		}
 
 		template<typename CharType>
+		SubStringInfo<CharType> SubStringAfterLast(const std::basic_string<CharType>& str, const std::basic_string<CharType>& del, size_t offset) {
+			offset = str.length() - offset - 1;
+			size_t pos = 0;
+			if ((pos = str.find_last_of(del, offset)) == std::string::npos) {
+				return SubStringInfo<CharType>(nullptr, 0);
+			}
+			else {
+				return SubStringInfo<CharType>(str.data() + pos + del.length(), str.length() - (pos + del.length()));
+			}
+		}
+
+		template<typename CharType>
+		SubStringInfo<UniString::char_type> SubStringAfterLast(const UniString& srcStr, std::basic_string<CharType>& destStr, const UniString& del, size_t offset = 0) {
+			destStr = srcStr;
+			return SubStringAfterLast<UniString::char_type>(destStr, del, offset);
+		}
+
+		template<typename CharType>
 		void SplitString(const std::basic_string<CharType>& str, const std::basic_string<CharType>& del, std::vector<SubStringInfo<CharType>>& vector, size_t offset = 0) {
 			size_t pos = 0;
 			while ((pos = str.find(del, offset)) != std::string::npos) {
@@ -174,3 +182,4 @@ namespace ProjectC {
 }
 
 std::basic_ostream<char>& operator<<(std::basic_ostream<char>& os, const wchar_t* str);
+std::basic_ostream<ProjectC::UniString::char_type>& operator<<(std::basic_ostream<ProjectC::UniString::char_type>& os, const ProjectC::UniString& str);

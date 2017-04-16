@@ -3,6 +3,8 @@
 
 
 namespace ProjectC::Interface::Detail {
+	static const char ProcessMessageName[] = "ProjC";
+
 	enum class BrowserProcessMessageType : int32_t {
 		LOG = 0,
 		ON_EXECUTE = 1,
@@ -22,6 +24,7 @@ namespace ProjectC::Interface::Detail {
 		STATUSBAR_REMOVE_CHILDS_BY_CLASS = 7,
 		STATUSBAR_REMOVE_CHILDS_BY_ATTR = 8,
 		SHOW = 9,
-		QUERY = 10
+		QUERY = 10,
+		EXEC_JS_CODE = 11
 	};
 }

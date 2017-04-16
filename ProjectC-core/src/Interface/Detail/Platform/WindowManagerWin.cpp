@@ -1,7 +1,7 @@
 #include <windows.h>
 
 #include "WindowManagerWin.h"
-#include "../../../App.h"
+#include "../../../Logging.h"
 
 
 const wchar_t ProjectC::Interface::Detail::WindowManagerWin::WINDOW_CLASS_NAME[] = L"ProjectCWindow";
@@ -29,7 +29,7 @@ bool ProjectC::Interface::Detail::WindowManagerWin::PlatformInitialize()
 
 	WINDOW_CLASS = RegisterClass(&windowClass);
 	if (WINDOW_CLASS == NULL) {
-		LOG_FATAL("RegisterClass failed. (ERRCODE: ", ::GetLastError(), ")");
+		PROJC_LOG(FATAL, "RegisterClass failed. (ERRCODE: ", ::GetLastError(), ")");
 		return false;
 	}
 	return true;
@@ -65,7 +65,7 @@ LRESULT CALLBACK ProjectC::Interface::Detail::WindowManagerWin::WindowProcedure(
 			mmInfo.ptMinTrackSize.x = minSize.x;
 			mmInfo.ptMinTrackSize.y = minSize.y;
 		}
-		else if(maxSize.x == 0 && maxSize.y == 0) {
+		else if (maxSize.x == 0 && maxSize.y == 0) {
 			return 0;
 		}
 		if (maxSize.x > 0 && maxSize.y > 0) {
@@ -81,7 +81,7 @@ LRESULT CALLBACK ProjectC::Interface::Detail::WindowManagerWin::WindowProcedure(
 
 }
 
-ProjectC::Interface::BrowserWindow* ProjectC::Interface::Detail::WindowManagerWin::DoGetWindow(WindowHandle handle)
+std::shared_ptr<ProjectC::Interface::BrowserWindow> ProjectC::Interface::Detail::WindowManagerWin::DoGetWindow(WindowHandle handle)
 {
-	return BrowserWindowWin::FromNativeHandle(handle);
+	return std::shared_ptr<BrowserWindow>{BrowserWindowWin::FromNativeHandle(handle)};
 }

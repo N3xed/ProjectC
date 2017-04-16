@@ -3,6 +3,12 @@
 
 
 int CALLBACK wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nCmdShow) {
+	ProjectC::Logging::Logger::GetInstance().OnLog().Add([](const ProjectC::Logging::LogMessage& msg) {
+		std::wstring str = msg.Message;
+		OutputDebugStringW(str.c_str());
+		OutputDebugStringW(L"\n");
+	});
+
 	CefEnableHighDPISupport();
 
 	CefMainArgs args{ hInstance };
@@ -17,7 +23,7 @@ int CALLBACK wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmd
 		new ProjectC::Application(args);
 	}
 	catch (const std::exception& ex) {
-		LOG(FATAL) << ex.what() << std::endl;
+		PROJC_LOG(FATAL, ex.what());
 		delete &ProjectC::App::Inst();
 		return -1;
 	}

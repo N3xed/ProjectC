@@ -12,7 +12,7 @@ namespace ProjectC::Interface {
 	class WindowManager {
 		friend class BrowserHandler;
 	protected:
-		std::list<std::unique_ptr<BrowserWindow>> m_windows;
+		std::list<std::shared_ptr<BrowserWindow>> m_windows;
 		std::mutex m_lock;
 
 		WindowManager();
@@ -30,9 +30,9 @@ namespace ProjectC::Interface {
 		virtual bool PlatformInitialize() = 0;
 		void RemoveWindow(BrowserWindow* window);
 
-		virtual BrowserWindow* DoGetWindow(WindowHandle handle);
-		virtual BrowserWindow* DoGetWindow(IWindow& window);
-		virtual BrowserWindow* DoGetWindow(CefRefPtr<CefBrowser> browser);
+		virtual std::shared_ptr<BrowserWindow> DoGetWindow(WindowHandle handle);
+		virtual std::shared_ptr<BrowserWindow> DoGetWindow(IWindow& window);
+		virtual std::shared_ptr<BrowserWindow> DoGetWindow(CefRefPtr<CefBrowser> browser);
 	public:
 		virtual ~WindowManager() {}
 
@@ -41,10 +41,11 @@ namespace ProjectC::Interface {
 		/// </summary>
 		/// <param name="handle">The handle.</param>
 		/// <returns>The Window on success, <c>nullptr</c> on failure.</returns>
-		BrowserWindow* GetWindow(WindowHandle handle);
-		BrowserWindow* GetWindow(IWindow& window);
-		BrowserWindow* GetWindow(CefRefPtr<CefBrowser> browser);
-		BrowserWindow* GetWindow(size_t index);
+		
+		std::shared_ptr<BrowserWindow> GetWindow(WindowHandle handle);
+		std::shared_ptr<BrowserWindow> GetWindow(IWindow& window);
+		std::shared_ptr<BrowserWindow> GetWindow(CefRefPtr<CefBrowser> browser);
+		std::shared_ptr<BrowserWindow> GetWindow(size_t index);
 
 		/// <summary>
 		/// Closes all windows.
@@ -56,13 +57,11 @@ namespace ProjectC::Interface {
 		void CloseAllWindowsAsync(bool force, std::function<void(bool result)> callback = nullptr);
 
 		size_t GetWindowCount() { return m_windows.size(); }
-		std::list<std::unique_ptr<BrowserWindow>>& GetWindows() { return m_windows; }
+		std::list<std::shared_ptr<BrowserWindow>>& GetWindows() { return m_windows; }
 
 		static WindowManager& GetInstance() {
 			return *s_instance;
 		}
-
-		static void RegisterSchemeHandlerFactories();
 
 		static BrowserWindow& CreateBrowserWindow(const UniString& title, int32_t x, int32_t y, int32_t width = -1, int32_t height = -1, IWindow* parent = nullptr);
 		static BrowserWindow& CreateBrowserWindow(const UniString& title, int32_t width = -1, int32_t height = -1, IWindow* parent = nullptr);

@@ -50,6 +50,7 @@ namespace ProjectC::Interface {
 		IStatusbar& GetStatusBar();
 
 		void ExecuteJSListener(const UniString& name, CefRefPtr<CefValue> arg = nullptr);
+		void ExecuteJSCode(const UniString& code);
 		
 		void Query(QueryType query, std::function<void(CefRefPtr<CefValue>)> callback);
 
