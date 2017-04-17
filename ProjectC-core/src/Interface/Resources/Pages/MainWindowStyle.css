@@ -14,6 +14,11 @@ body{
     background-color: #597861;
     border-bottom: 2px solid #263F2C;
 }
+#innerNavigation{
+    float: left;
+    height: 30px;
+    flex: 1 0 auto;
+}
 #content{
     border: none;
     width: 100%;
@@ -25,6 +30,7 @@ body{
     background-color: dimgray;
 }
 .navButton{
+    display: inline;
     height: 100%;
     border: none;
     display: inline;
@@ -45,6 +51,7 @@ body{
     outline: none;
 }
 .navButtonDisabled{
+    display: inline;
     height: 100%;
     border: none;
     display: inline;
@@ -60,25 +67,30 @@ body{
     outline: none;
 }
 .arrow{
-    transform: rotate(-45deg);
-    border: solid black;
-    border-width: 0 4px 4px 0;
-    width: 10px;
-    height: 10px;
+    display: inline-block;
+    width: 0px;
+    height: 0px;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-left: 5px solid black;
+    margin-left: 2px;
+    padding-right: 2px;
+    vertical-align: middle;
 }
 
 @keyframes fadeInNavigation{
     from{
-        opacity: 0.4;
-        width: 0px;
+        opacity: 0;
+        top: -40px;
     }
     to{
         opacity: 1;
-        width: auto;
+        top: 0px;
     }
 }
 .navFadeInAnimation{
-    display: block;
+    display: inline;
+    position: relative;
     height: 30px;
     animation-name: fadeInNavigation;
     animation-direction: normal;

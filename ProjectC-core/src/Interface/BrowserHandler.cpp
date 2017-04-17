@@ -68,12 +68,11 @@ bool ProjectC::Interface::BrowserHandler::OnProcessMessageReceived(CefRefPtr<Cef
 				}
 
 				int32_t callbackId = argsList->GetInt(2);
-				UniString str = std::get<0>(currentModule)->JSGetStringResource(argsList->GetValue(3));
 
 				auto processMsg = CefProcessMessage::Create(Detail::ProcessMessageName);
 				argsList = processMsg->GetArgumentList();
 				argsList->SetInt(0, static_cast<int32_t>(Detail::RenderProcessMessageType::STR_RESOURCE_RESPONSE));
-				argsList->SetString(1, str);
+				argsList->SetString(1, std::get<0>(currentModule)->JSGetStringResource(argsList->GetValue(3)));
 				argsList->SetInt(2, std::get<2>(currentModule));
 				argsList->SetInt(3, callbackId);
 

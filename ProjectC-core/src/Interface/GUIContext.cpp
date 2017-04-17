@@ -121,8 +121,10 @@ ProjectC::Interface::GUIContext::GUIContext(CefMainArgs& args)
 		}
 		if (wnd) {
 			std::weak_ptr<BrowserWindow> weakPtr = wnd;
-			std::stringstream ss;
+			BasicUniStringStream ss;
 			for (size_t i = 2; i < args.size(); ++i) {
+				if(i != 2)
+					ss << " ";
 				StringUtils::Concatenate(ss, args[i].ToString());
 			}
 			UniString str = ss.str();

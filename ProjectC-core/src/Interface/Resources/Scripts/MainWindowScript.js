@@ -1,15 +1,16 @@
 var showModule = function (name, isCoherent) {
     var nav = document.getElementById("innerNavigation");
-    var items = nav.getElementsByClassName("navButtonDisabled");
-    for (var i = 0; i < items.length; ++i) {
-        items[i].classList.remove("navButtonDisabled");
-        items[i].classList.add("navButton");
+    var items = nav.getElementsByTagName("button");
+    if (items.length > 0) {
+        var item = items[items.length - 1];
+        item.classList.add("navButton");
+        item.classList.remove("navButtonDisabled");
     }
 
     var container = document.createElement("div");
     container.style.opacity = "0";
 
-    if (isCoherent) {
+    if (isCoherent && nav.hasChildNodes()) {
         var arrow = document.createElement("div");
         arrow.classList.add("arrow");
         container.appendChild(arrow);
