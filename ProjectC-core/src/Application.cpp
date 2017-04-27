@@ -6,8 +6,8 @@ ProjectC::IApplication& ProjectC::App::Inst() {
 	return Application::GetInstance();
 }
 
-ProjectC::Interface::WindowManager& ProjectC::App::WndMgr() {
-	return Interface::WindowManager::GetInstance();
+ProjectC::Interface::BrowserWindowManager& ProjectC::App::WndMgr() {
+	return Interface::BrowserWindowManager::GetInstance();
 }
 
 ProjectC::Interface::GUIContext& ProjectC::App::GUICnxt() {
@@ -18,7 +18,7 @@ ProjectC::Application* ProjectC::Application::s_instance{ nullptr };
 
 void ProjectC::Application::Exit(bool force)
 {
-	Interface::WindowManager::GetInstance().CloseAllWindowsAsync(force);
+	Interface::BrowserWindowManager::GetInstance().CloseAllWindowsAsync(force);
 }
 
 ProjectC::Application::Application(CefMainArgs& args)

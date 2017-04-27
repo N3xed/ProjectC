@@ -11,7 +11,7 @@ ProjectC::Interface::Detail::ConsoleWindowWin::ConsoleWindowWin(const UniString&
 	s_instance = this;
 
 	if (!::AllocConsole()) {
-		PROJC_LOG(FATAL, "AllocConsole failed. ", WindowWin::GetLastErrorString());
+		PROJC_LOG(FATAL, "AllocConsole failed. ");
 		throw std::exception("AllocConsole failed.");
 	}
 	m_inputHandle = GetStdHandle(STD_INPUT_HANDLE);
@@ -56,7 +56,7 @@ void ProjectC::Interface::Detail::ConsoleWindowWin::Close()
 void ProjectC::Interface::Detail::ConsoleWindowWin::Write(const UniString& str, uint32_t fontCol)
 {
 	const cef_string_utf16_t* strStruct = str.GetStruct();
-	WriteConsoleW(m_outputHandle, strStruct->str, strStruct->length, NULL, NULL);
+	WriteConsoleW(m_outputHandle, strStruct->str, static_cast<DWORD>(strStruct->length), NULL, NULL);
 }
 
 void ProjectC::Interface::Detail::ConsoleWindowWin::ThreadRoutine()

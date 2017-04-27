@@ -1,5 +1,6 @@
 #include "ModuleManager.h"
 #include "DynamicLibrary.h"
+#include "../Logging.h"
 
 namespace pm = ProjectC::Modules;
 
@@ -46,7 +47,7 @@ ProjectC::Modules::IModule::RoutineRegisterer ProjectC::Modules::ModuleManager::
 {
 	return [module, &info](int16_t id, IModule::Routine routine) {
 		if (!info.AddRoutine(id, routine)) {
-			throw std::exception((std::string("Could not add routine ") + std::to_string(id) + "@" + module->GetName() + "/" + info.GetLibrary()->GetName()).c_str());
+			PROJC_LOG(FATAL, "Could not add routine ", info.GetLibrary()->GetName(), "/", info.GetModule().GetName(), "/", id);
 		}
 	};
 }

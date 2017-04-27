@@ -11,7 +11,7 @@ namespace ProjectC {
 		class DynamicLibrary {
 		private:
 			HMODULE m_libraryHandle;
-			std::string m_name;
+			UniString m_name;
 		public:
 			DynamicLibrary(const DynamicLibrary& obj) = delete;
 			DynamicLibrary(DynamicLibrary&& obj);
@@ -19,8 +19,8 @@ namespace ProjectC {
 			DynamicLibrary(const UniString& filePath);
 			~DynamicLibrary();
 
-			void* GetFunction(std::string name) const noexcept;
-			const std::string& GetName() const noexcept;
+			void* GetFunction(const UniString& name) const noexcept;
+			const UniString& GetName() const noexcept { return m_name; }
 
 			DynamicLibrary& operator=(DynamicLibrary&& obj) = delete;
 			DynamicLibrary& operator=(const DynamicLibrary& obj) = delete;

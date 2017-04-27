@@ -1,5 +1,5 @@
 #pragma once
-#include "../../WindowManager.h"
+#include "../../BrowserWindowManager.h"
 #include "../../../Platform.h"
 #include "BrowserWindowWin.h"
 

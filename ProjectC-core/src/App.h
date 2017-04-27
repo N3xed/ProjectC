@@ -21,7 +21,7 @@ namespace ProjectC::Modules {
 }
 namespace ProjectC::Interface {
 	class LanguageHelper;
-	class WindowManager;
+	class BrowserWindowManager;
 	class GUIContext;
 }
 
@@ -71,7 +71,7 @@ namespace ProjectC {
 		inline Modules::ExecutionManager& ExecMgr() {
 			return Inst().GetExecutionManager();
 		}
-		Interface::WindowManager& WndMgr();
+		Interface::BrowserWindowManager& WndMgr();
 		Interface::GUIContext& GUICnxt();
 	}
 }

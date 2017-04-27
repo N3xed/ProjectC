@@ -1,11 +1,11 @@
 #pragma once
 
-#include "../Utils/String.h"
-
 #include <stdint.h>
 #include <functional>
 #include <vector>
 #include <memory>
+
+#include "../UniString.h"
 
 namespace ProjectC {
 
@@ -32,8 +32,8 @@ namespace ProjectC {
 			virtual void OnDestroy(ExecutionContext& context) = 0;
 			virtual void OnStartup(ExecutionContext& context) = 0;
 
-			virtual const std::string& GetName() const = 0;
-			virtual const std::string& GetDescription() const = 0;
+			virtual const UniString& GetName() const = 0;
+			virtual const UniString& GetDescription() const = 0;
 			virtual const Version_t& GetVersion() const = 0;
 			virtual const UID_t& GetUID() const = 0;
 

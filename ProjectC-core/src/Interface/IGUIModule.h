@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <functional>
 #include <map>
+#include <mutex>
 
 #include <cef/include/cef_values.h>
 
@@ -15,21 +16,22 @@ namespace ProjectC {
 	namespace Interface {
 		class IGUIModule {
 		public:
-			typedef std::function<void(const UniString& content)> LoadCallback;
-			typedef std::function<void(const uint8_t* buffer, size_t size, const UniString& mimeType)> ResourceLoadCallback;
+			typedef std::function<void(const UniString& content, std::mutex& mutex)> LoadCallback;
+			typedef std::function<void(const uint8_t* buffer, size_t size, const UniString& mimeType, std::mutex& mutex)> ResourceLoadCallback;
 			typedef std::function<void()> CancelCallback;
 			typedef std::function<void(CefRefPtr<CefValue> arg)> JSListener;
 
 			virtual ~IGUIModule() {}
 			
 			/// <summary>
-			/// Gets the name with is displayed on the main page.
-			/// This string is also availabe through JS code: app.module().name()
+			/// Gets the name, which is displayed on the main page.
+			/// This string is also availabe through JS code: app.module().name
 			/// </summary>
 			/// <returns>The displayed name.</returns>
 			virtual const UniString& GetName() = 0;
 			/// <summary>
 			/// Loads the HTML code for the gui.
+			/// Available through the URL 'page:module', only if the GUIModule is active.
 			/// </summary>
 			/// <param name="callback">A callback which should be called when the requested string is available (may be called in any thread, inside or outside this method).</param>
 			/// <returns>
@@ -51,7 +53,7 @@ namespace ProjectC {
 			/// <summary>
 			/// Loads the CSS code for the gui.
 			/// Note: How many times or if this method gets called at all depends on the html code from <c>LoadHTML</c>.
-			/// This method gets called when the browser requests a stylesheet resource from any "res:module.[key]" URLs. The [key] part gets passed to this method.
+			/// This method gets called when the browser requests a stylesheet resource from any "res:module/css/[key]" URLs. The [key] part gets passed to this method.
 			/// </summary>
 			/// <param name="callback">A callback which should be called when the requested string is available (may be called in any thread, inside or outside this method).</param>
 			/// <param name="key">A key for identification, which resource should be loaded. Note: More information on resource and GUIModule loading is available in the <c>BrowserWindow::PushLayer</c> documentation.</param>
@@ -63,7 +65,7 @@ namespace ProjectC {
 			/// <summary>
 			/// Loads the JS code for the gui.
 			/// Note: How many times or if this method gets called at all depends on the html code from <c>LoadHTML</c>.
-			/// This method gets called when the browser requests a script resource from any "res:module.[key]" URLs. The [key] part gets passed to this method.
+			/// This method gets called when the browser requests a script resource from any "res:module/js/[key]" URLs. The [key] part gets passed to this method.
 			/// </summary>
 			/// <param name="callback">A callback which should be called when the requested string is available (may be called in any thread, inside or outside this method).</param>
 			/// <param name="key">A key for identification, which resource should be loaded. Note: More information on resource and GUIModule loading is available in the <c>BrowserWindow::PushLayer</c> documentation.</param>
@@ -75,7 +77,7 @@ namespace ProjectC {
 			/// <summary>
 			/// Loads any other resource. 
 			/// Note: How many times or if this method gets called at all depends on the html or js (through XMLHttpRequest, etc.) code.
-			/// This method gets called when the browser requests a (non stylesheet and script) resource from any "res:module.[key]" URLs. The [key] part gets passed to this method.
+			/// This method gets called when the browser requests a (non stylesheet and script) resource from any "res:module/res/[key]" URLs. The [key] part gets passed to this method.
 			/// </summary>
 			/// <param name="callback">A callback which should be called when the requested resouces are available (may be called in any thread, inside or outside this method).</param>
 			/// <param name="key">A key for identification, which resource should be loaded. Note: More information on resource and GUIModule loading is available in the <c>BrowserWindow::PushLayer</c> documentation.</param>

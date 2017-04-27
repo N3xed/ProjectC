@@ -31,7 +31,7 @@ boost::optional<std::tuple<uint16_t, ProjectC::Modules::IModule::Routine>>& Proj
 	return lastRoutine;
 }
 
-void ProjectC::Modules::ExecutionContext::RemoveData(const std::string& key)
+void ProjectC::Modules::ExecutionContext::RemoveData(const UniString& key)
 {
 	std::lock_guard<std::mutex> lock{ m_mutex };
 	auto it = m_userData.find(key);

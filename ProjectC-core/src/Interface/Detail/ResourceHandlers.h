@@ -1,10 +1,18 @@
 #pragma once
-#include "../BrowserWindow.h"
 #include <cef/include/cef_resource_handler.h>
+
+#include "../BrowserWindow.h"
 #include "../Resources/ResourceManager.h"
 #include "../IGUIModule.h"
 
 namespace ProjectC::Interface::Detail {
+
+	const enum class ResourceType : int32_t {
+		UNKNOWN = 0,
+		CSS = 1,
+		JS = 2
+	};
+
 	class ManagerResourceHandler : public CefResourceHandler {
 	private:
 		ResourceDelegate* m_resDelegate;
@@ -20,37 +28,23 @@ namespace ProjectC::Interface::Detail {
 		IMPLEMENT_REFCOUNTING(ManagerResourceHandler);
 	};
 
-	template<int32_t type>
 	class ModuleResourceHandler : public CefResourceHandler
-	{};
-
-	template<>
-	class ModuleResourceHandler<0> : public CefResourceHandler {
+	{
+	protected:
 		std::shared_ptr<IGUIModule> m_guiModule;
 		UniString m_key;
-		const UniString* m_content;
+		UniString m_mimeType;
+
+		const uint8_t* m_buffer;
+		size_t m_bufferSize;
+		size_t m_bufferPos{ 0 };
+
 		IGUIModule::CancelCallback m_cancelCallback;
+		ResourceType m_resType;
+		std::unique_lock<std::mutex> m_lockGuard;
 	public:
-		ModuleResourceHandler(std::shared_ptr<IGUIModule> module, UniString key);
-
-		virtual bool ProcessRequest(CefRefPtr<CefRequest> request, CefRefPtr<CefCallback> callback) override;
-
-		virtual void GetResponseHeaders(CefRefPtr<CefResponse> response, int64& response_length, CefString& redirectUrl) override;
-		virtual bool ReadResponse(void* data_out, int bytes_to_read, int& bytes_read, CefRefPtr<CefCallback> callback) override;
-
-		virtual void Cancel() override;
-
-		IMPLEMENT_REFCOUNTING(ModuleResourceHandler);
-	};
-		
-	template<>
-	class ModuleResourceHandler<1> : public CefResourceHandler {
-		std::shared_ptr<IGUIModule> m_guiModule;
-		UniString m_key;
-		const UniString* m_content;
-		IGUIModule::CancelCallback m_cancelCallback;
-	public:
-		ModuleResourceHandler(std::shared_ptr<IGUIModule> module, UniString key);
+		ModuleResourceHandler(std::shared_ptr<IGUIModule> module, UniString key, ResourceType resType);
+		ModuleResourceHandler(std::shared_ptr<IGUIModule> module);
 
 		virtual bool ProcessRequest(CefRefPtr<CefRequest> request, CefRefPtr<CefCallback> callback) override;
 
@@ -62,12 +56,12 @@ namespace ProjectC::Interface::Detail {
 		IMPLEMENT_REFCOUNTING(ModuleResourceHandler);
 	};
 
-	template<int32_t type>
+	template<ResourceType type>
 	class RootResourceHandler : public CefResourceHandler
 	{};
 
 	template<>
-	class RootResourceHandler<0> : public CefResourceHandler {
+	class RootResourceHandler<ResourceType::CSS> : public CefResourceHandler {
 	public:
 		virtual bool ProcessRequest(CefRefPtr<CefRequest> request, CefRefPtr<CefCallback> callback) override;
 
@@ -80,7 +74,7 @@ namespace ProjectC::Interface::Detail {
 	};
 
 	template<>
-	class RootResourceHandler<1> : public CefResourceHandler {
+	class RootResourceHandler<ResourceType::JS> : public CefResourceHandler {
 	public:
 		virtual bool ProcessRequest(CefRefPtr<CefRequest> request, CefRefPtr<CefCallback> callback) override;
 
@@ -92,12 +86,7 @@ namespace ProjectC::Interface::Detail {
 		IMPLEMENT_REFCOUNTING(RootResourceHandler);
 	};
 
-	template<int32_t type>
-	class RootPageHandler : public CefResourceHandler
-	{};
-
-	template<>
-	class RootPageHandler<0> : public CefResourceHandler {
+	class RootPageHandler : public CefResourceHandler {
 	public:
 		virtual bool ProcessRequest(CefRefPtr<CefRequest> request, CefRefPtr<CefCallback> callback) override;
 
@@ -109,21 +98,10 @@ namespace ProjectC::Interface::Detail {
 		IMPLEMENT_REFCOUNTING(RootPageHandler);
 	};
 
-	template<>
-	class RootPageHandler<1> : public CefResourceHandler {
-		std::shared_ptr<IGUIModule> m_guiModule;
-		IGUIModule::CancelCallback m_cancelCallback;
-		const UniString* m_content;
+	class ModulePageHandler : public ModuleResourceHandler {
 	public:
-		RootPageHandler(std::shared_ptr<IGUIModule> m_module);
+		ModulePageHandler(std::shared_ptr<IGUIModule> m_module);
 
 		virtual bool ProcessRequest(CefRefPtr<CefRequest> request, CefRefPtr<CefCallback> callback) override;
-
-		virtual void GetResponseHeaders(CefRefPtr<CefResponse> response, int64& response_length, CefString& redirectUrl) override;
-		virtual bool ReadResponse(void* data_out, int bytes_to_read, int& bytes_read, CefRefPtr<CefCallback> callback) override;
-
-		virtual void Cancel() override;
-
-		IMPLEMENT_REFCOUNTING(RootPageHandler);
 	};
 }

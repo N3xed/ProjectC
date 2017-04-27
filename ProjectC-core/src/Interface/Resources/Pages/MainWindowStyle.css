@@ -1,100 +1,60 @@
-body{
+body {
     background-color: #323232;
     font-family: Calibri, Arial, sans-serif;
-    border: none;
-    padding: 0px;
-    position: relative;
-    margin: 0px;
+    padding: 0;
+    margin: 0;
     display: flex;
     flex-direction: column;
+    box-sizing: border-box;
+    border-left: 1px solid dimgray;
+    border-right: 1px solid dimgray;
+    border-bottom: 1px solid dimgray;
 }
-#navigation{
-    height: 30px;
+
+#titlebar {
+    display: inline-block;
+    height: 25px;
+    line-height: 25px;
     width: 100%;
-    background-color: #597861;
-    border-bottom: 2px solid #263F2C;
+    background-color: #2E6831;
+    vertical-align: middle;
 }
-#innerNavigation{
-    float: left;
-    height: 30px;
-    flex: 1 0 auto;
+.titlebarButton{
+    height: 100%;
+    float: right;
+    width: 30px;
+    border: none;
+    background-color: inherit;
 }
-#content{
+.titlebarButton:focus{
+    outline: none;
+}
+.redButton:hover{
+    background-color: indianred;
+}
+.redButton:active{
+    background-color: darkred;
+}
+.grayButton:hover {
+    background-color: #548356;
+}
+.grayButton:active {
+    background-color: #265629;
+}
+
+#windowTitle{
+    display: inline-block;
+    padding: 0 10px 0 5px;
+    color: black;
+}
+
+#content {
     border: none;
     width: 100%;
     flex: 1 1 auto;
 }
 #statusbar{
     width: 100%;
-    height: 25px;
+    height: 20px;
     background-color: dimgray;
-}
-.navButton{
-    display: inline;
-    height: 100%;
-    border: none;
-    display: inline;
-    background-color: inherit;
-    font-weight: bold;
-    color: #161d18;
-}
-.navButton:hover{
-    background-color: #6D9177;
-    transition-duration: 150ms;
-    transition-property: background-color;
-}
-.navButton:active{
-    background-color: #5F9F6F;
-    outline: none;
-}
-.navButton:focus{
-    outline: none;
-}
-.navButtonDisabled{
-    display: inline;
-    height: 100%;
-    border: none;
-    display: inline;
-    font-weight: bold;
-    background-color: #3fa65b;
-    color: #161d18;
-    border-right: 2px solid #1D7B36;
-}
-.navButtonDisabled:focus{
-    outline: none;
-}
-.navButtonDisabled:active{
-    outline: none;
-}
-.arrow{
-    display: inline-block;
-    width: 0px;
-    height: 0px;
-    border-top: 5px solid transparent;
-    border-bottom: 5px solid transparent;
-    border-left: 5px solid black;
-    margin-left: 2px;
-    padding-right: 2px;
-    vertical-align: middle;
-}
-
-@keyframes fadeInNavigation{
-    from{
-        opacity: 0;
-        top: -40px;
-    }
-    to{
-        opacity: 1;
-        top: 0px;
-    }
-}
-.navFadeInAnimation{
-    display: inline;
-    position: relative;
-    height: 30px;
-    animation-name: fadeInNavigation;
-    animation-direction: normal;
-    animation-iteration-count: 1;
-    animation-duration: 0.4s;
-    animation-fill-mode:forwards;
 }

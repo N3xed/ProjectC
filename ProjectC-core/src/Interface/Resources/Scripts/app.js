@@ -39,5 +39,20 @@ var app = (function () {
         // Unregisters a previously registers listener and returns true, returns false if no listener was found.
         // app.unregisterListener(string key)
         unregisterListener: nUnregisterListener,
+        window: (function () {
+            native function nGetWindowTitle();
+            native function nSetWindowTitle(str);
+            native function nShowWindow(show);
+            native function nCloseWindow();
+            native function nOpenWindow();
+
+            return {
+                setTitle: nSetWindowTitle,
+                getTitle: nGetWindowTitle,
+                show: nShowWindow,
+                close: nCloseWindow,
+                open: nOpenWindow
+            };
+        }())
     };
 }());

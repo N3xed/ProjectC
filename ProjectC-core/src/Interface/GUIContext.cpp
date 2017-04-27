@@ -12,7 +12,7 @@ CefRefPtr<CefApp> ProjectC::Interface::GUIContext::GetCefAppForSubProcess()
 	class ProcessAppImpl : public CefApp {
 		CefRefPtr<Detail::RenderProcessHandler> m_renderProcessHandler = new Detail::RenderProcessHandler();
 	public:
-		virtual void OnRegisterCustomSchemes(CefRefPtr<CefSchemeRegistrar> registrar) override {
+		virtual void OnRegisterCustomSchemes(CefRawPtr<CefSchemeRegistrar> registrar) override {
 			DoRegisterCustomScheme(registrar);
 		}
 		virtual CefRefPtr<CefRenderProcessHandler> GetRenderProcessHandler() override {
@@ -30,9 +30,10 @@ ProjectC::Interface::GUIContext::GUIContext(CefMainArgs& args)
 {
 	s_instance = this;
 
-	if (!Interface::WindowManager::Initialize()) {
+	if (!Interface::BrowserWindowManager::Initialize()) {
 		throw std::exception("Failed to initialize WindowManager");
 	}
+
 
 	CefSettings settings{};
 	settings.no_sandbox = true;
@@ -44,97 +45,71 @@ ProjectC::Interface::GUIContext::GUIContext(CefMainArgs& args)
 	m_consoleWindow = std::unique_ptr<Interface::ConsoleWindow>(Interface::ConsoleWindow::Create("Console"));
 	m_consoleWindow->Hide();
 	m_consoleWindow->AddCommand("refresh", "Refreshes the browser.", [](Interface::ConsoleWindow& console, const Interface::ConsoleWindow::SubStringVector& args) {
-		std::shared_ptr<BrowserWindow> wnd{ nullptr };
-		if (args.size() < 2)
-			wnd = App::WndMgr().GetWindow(static_cast<size_t>(0));
-		else
-		{
+		size_t index{ 0 };
+		if (args.size() >= 2) {
 			try {
 				size_t index = static_cast<size_t>(std::stoi(args[1].ToString()));
-				if (index < 0 || index > App::WndMgr().GetWindowCount())
-					return false;
-				wnd = App::WndMgr().GetWindow(static_cast<size_t>(index));
 			}
 			catch (const std::exception&) {
 				return false;
 			}
 		}
-		if (wnd) {
-			std::weak_ptr<BrowserWindow> weakPtr = wnd;
-			RunOnGUIThread([weakPtr]() {
-				auto wndPtr = weakPtr.lock();
-				if (wndPtr)
-					wndPtr->GetBrowser().Reload();
-			});
-			return true;
-		}
-		return false;
+
+		RunOnGUIThread([index]() {
+			if (auto window = BrowserWindowManager::GetInstance().GetWindow(index)) {
+				window->GetBrowser().Reload();
+			}
+		});
+		return true;
 	});
 	m_consoleWindow->AddCommand("showDevTools", "Shows the development tools window.", [](Interface::ConsoleWindow& console, const Interface::ConsoleWindow::SubStringVector& args) {
-		std::shared_ptr<BrowserWindow> wnd{ nullptr };
-		if (args.size() < 2)
-			wnd = App::WndMgr().GetWindow(static_cast<size_t>(0));
-		else
-		{
+		size_t index{ 0 };
+		if (args.size() >= 2) {
 			try {
 				size_t index = static_cast<size_t>(std::stoi(args[1].ToString()));
-				if (index < 0 || index > App::WndMgr().GetWindowCount())
-					return false;
-				wnd = App::WndMgr().GetWindow(static_cast<size_t>(index));
 			}
 			catch (const std::exception&) {
 				return false;
 			}
 		}
-		if (wnd) {
-			std::weak_ptr<BrowserWindow> weakPtr = wnd;
-			RunOnGUIThread([weakPtr]() {
-				auto wndPtr = weakPtr.lock();
-				if (wndPtr)
-					wndPtr->ShowDevTools();
-			});
-			return true;
-		}
-		return false;
+
+		RunOnGUIThread([index]() {
+			if (auto window = BrowserWindowManager::GetInstance().GetWindow(index)) {
+				window->ShowDevTools();
+			}
+		});
+		return true;
 	});
 	m_consoleWindow->AddCommand({ "quit", "exit" }, "Exits the application.", [](Interface::ConsoleWindow& console, const Interface::ConsoleWindow::SubStringVector& args) {
 		App::Inst().Exit();
 		return true;
 	});
 	m_consoleWindow->AddCommand("execJSCode", "Executes JavaScript code on the main frame of the browser.", [](Interface::ConsoleWindow& console, const Interface::ConsoleWindow::SubStringVector& args) {
-		if (args.size() < 3)
-			return false;
-		std::shared_ptr<BrowserWindow> wnd{ nullptr };
-		if (args.size() < 2)
-			wnd = App::WndMgr().GetWindow(static_cast<size_t>(0));
-		else
-		{
+		size_t index{ 0 };
+		if (args.size() >= 2) {
 			try {
 				size_t index = static_cast<size_t>(std::stoi(args[1].ToString()));
-				if (index < 0 || index > App::WndMgr().GetWindowCount())
-					return false;
-				wnd = App::WndMgr().GetWindow(static_cast<size_t>(index));
 			}
 			catch (const std::exception&) {
 				return false;
 			}
 		}
-		if (wnd) {
-			std::weak_ptr<BrowserWindow> weakPtr = wnd;
-			BasicUniStringStream ss;
+
+		BasicUniStringStream ss;
+		if (args.size() > 2) {
 			for (size_t i = 2; i < args.size(); ++i) {
-				if(i != 2)
+				if (i != 2)
 					ss << " ";
 				StringUtils::Concatenate(ss, args[i].ToString());
 			}
-			UniString str = ss.str();
-			RunOnGUIThread([weakPtr, str]() {
-				auto wndPtr = weakPtr.lock();
-				if (wndPtr)
-					wndPtr->ExecuteJSCode(str);
-			});
-			return true;
 		}
+		UniString str = ss.str();
+
+		RunOnGUIThread([index, str]() {
+			if (auto window = BrowserWindowManager::GetInstance().GetWindow(index)) {
+				window->ExecuteJSCode(str);
+			}
+		});
 		return true;
 	});
 
@@ -157,7 +132,7 @@ ProjectC::Interface::GUIContext::GUIContext(CefMainArgs& args)
 ProjectC::Interface::GUIContext::~GUIContext()
 { }
 
-void ProjectC::Interface::GUIContext::OnRegisterCustomSchemes(CefRefPtr<CefSchemeRegistrar> registrar)
+void ProjectC::Interface::GUIContext::OnRegisterCustomSchemes(CefRawPtr<CefSchemeRegistrar> registrar)
 {
 	DoRegisterCustomScheme(registrar);
 }
@@ -174,15 +149,15 @@ void ProjectC::Interface::GUIContext::OnContextInitialized()
 	if (!CefRegisterSchemeHandlerFactory(Detail::ResourceSchemeHandlerFactory::ResourceSchemeId, "", new Detail::ResourceSchemeHandlerFactory()))
 		PROJC_LOG(FATAL, "Could not register scheme factory.");
 
-	BrowserWindow& window = Interface::WindowManager::CreateBrowserWindow("ProjectC", 1024, 720, nullptr);
-
-	window.GetWindow().Show(true);
+	BrowserWindow& window = Interface::BrowserWindowManager::CreateWindow("ProjectC", 1024, 720, 0, 0);
+	window.GetWindow().CenterOnScreen();
+	window.GetWindow().Show();
 }
 
-void ProjectC::Interface::GUIContext::DoRegisterCustomScheme(CefRefPtr<CefSchemeRegistrar> registrar)
+void ProjectC::Interface::GUIContext::DoRegisterCustomScheme(CefRawPtr<CefSchemeRegistrar> registrar)
 {
-	registrar->AddCustomScheme(Detail::PageSchemeHandlerFactory::PageSchemeId, false, false, false);
-	registrar->AddCustomScheme(Detail::ResourceSchemeHandlerFactory::ResourceSchemeId, false, false, false);
+	registrar->AddCustomScheme(Detail::PageSchemeHandlerFactory::PageSchemeId, false, false, false, false, false);
+	registrar->AddCustomScheme(Detail::ResourceSchemeHandlerFactory::ResourceSchemeId, false, false, false, false, false);
 }
 
 int32_t ProjectC::Interface::GUIContext::RunMessageLoop()
@@ -205,7 +180,7 @@ bool ProjectC::Interface::GUIContext::Initialize(CefMainArgs& args)
 
 void ProjectC::Interface::GUIContext::Shutdown()
 {
-	Interface::WindowManager::Shutdown();
+	Interface::BrowserWindowManager::Shutdown();
 	CefShutdown();
 	s_instance = nullptr;
 }

@@ -1,7 +1,7 @@
 #pragma once
 #include "../App.h"
 #include "ConsoleWindow.h"
-#include "WindowManager.h"
+#include "BrowserWindowManager.h"
 
 #include <cef/include/cef_app.h>
 
@@ -22,7 +22,7 @@ namespace ProjectC::Interface {
 		virtual CefRefPtr<CefBrowserProcessHandler> GetBrowserProcessHandler() override { return this; }
 		//virtual CefRefPtr<CefRenderProcessHandler> GetRenderProcessHandler() override { return this; }
 
-		virtual void OnRegisterCustomSchemes(CefRefPtr<CefSchemeRegistrar> registrar) override;
+		virtual void OnRegisterCustomSchemes(CefRawPtr<CefSchemeRegistrar> registrar) override;
 		virtual void OnContextInitialized() override;
 
 		virtual void OnRenderProcessThreadCreated(CefRefPtr<CefListValue> extra_info) override;
@@ -38,7 +38,7 @@ namespace ProjectC::Interface {
 			return *s_instance;
 		}
 	private:
-		static void DoRegisterCustomScheme(CefRefPtr<CefSchemeRegistrar> registrar);
+		static void DoRegisterCustomScheme(CefRawPtr<CefSchemeRegistrar> registrar);
 
 
 		IMPLEMENT_REFCOUNTING(GUIContext);

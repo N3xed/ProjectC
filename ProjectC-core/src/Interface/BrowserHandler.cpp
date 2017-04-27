@@ -4,22 +4,13 @@
 #include "../ThreadManager.h"
 #include "../Logging.h"
 
-bool ProjectC::Interface::BrowserHandler::DoClose(CefRefPtr<CefBrowser> browser)
-{
-	// Calls protected method here to delay the deletion.
-	// If the IWindow::OnClose listener were to remove the window from the manager, memory access violation would occur.
-	WindowManager::GetInstance().RemoveWindow(m_browserWindow);
-	return true;
-}
-
-void ProjectC::Interface::BrowserHandler::OnAfterCreated(CefRefPtr<CefBrowser> browser)
-{
-}
+ProjectC::Interface::BrowserHandler::BrowserHandler(BrowserWindow* browserWindow) : m_browserWindow(browserWindow)
+{ }
 
 ProjectC::Interface::BrowserHandler::~BrowserHandler()
 { }
 
-ProjectC::Interface::BrowserHandler::BrowserHandler(BrowserWindow* browserWindow) : m_browserWindow(browserWindow)
+void ProjectC::Interface::BrowserHandler::OnAfterCreated(CefRefPtr<CefBrowser> browser)
 { }
 
 void ProjectC::Interface::BrowserHandler::OnLoadEnd(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, int httpStatusCode)
@@ -120,9 +111,47 @@ bool ProjectC::Interface::BrowserHandler::OnProcessMessageReceived(CefRefPtr<Cef
 				PROJC_LOG(WARN, "Could not find a callback with id ", id);
 			});
 			return true;
+		case (int32_t)Detail::BrowserProcessMessageType::GET_WINDOW_TITLE:
+			GUIContext::RunOnGUIThread([this, message]() {
+				auto processMsg = CefProcessMessage::Create(Detail::ProcessMessageName);
+				auto argsList = processMsg->GetArgumentList();
+				argsList->SetInt(0, static_cast<int32_t>(Detail::RenderProcessMessageType::WINDOW_TITLE_RESPONSE));
+				argsList->SetInt(1, message->GetArgumentList()->GetInt(1));
+				argsList->SetString(2, m_browserWindow->GetWindow().GetTitle());
+
+				m_browserWindow->GetBrowser().SendProcessMessage(PID_RENDERER, processMsg);
+			});
+			return true;
+		case (int32_t)Detail::BrowserProcessMessageType::SET_WINDOW_TITLE:
+			GUIContext::RunOnGUIThread([this, message]() {
+				m_browserWindow->GetWindow().SetTitle(message->GetArgumentList()->GetString(1));
+			});
+			return true;
+		case (int32_t)Detail::BrowserProcessMessageType::SHOW_WINDOW:
+			GUIContext::RunOnGUIThread([this, message]() {
+				if (message->GetArgumentList()->GetBool(1)) {
+					m_browserWindow->GetWindow().Show();
+				}
+				else {
+					m_browserWindow->GetWindow().Hide();
+				}
+			});
+			return true;
+		case (int32_t)Detail::BrowserProcessMessageType::CLOSE_WINDOW:
+			GUIContext::RunOnGUIThread([this, message]() {
+				m_browserWindow->Close(false);
+			});
+			return true;
+		case (int32_t)Detail::BrowserProcessMessageType::OPEN_WINDOW:
+			break;
 		default:
 			break;
 		}
 	}
 	return false;
+}
+
+void ProjectC::Interface::BrowserHandler::OnBeforeClose(CefRefPtr<CefBrowser> browser)
+{
+	BrowserWindowManager::GetInstance().RemoveWindow(m_browserWindow);
 }

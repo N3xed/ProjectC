@@ -14,10 +14,10 @@ CefRefPtr<CefResourceHandler> ProjectC::Interface::Detail::PageSchemeHandlerFact
 		UniString page = StringUtils::SubStringAfterFirst(request->GetURL(), temp, ":");
 
 		if (page == "module") {
-			return new RootPageHandler<1>(std::get<0>(handler->GetBrowserWindow()->GetCurrentModule()));
+			return new ModulePageHandler(std::get<0>(handler->GetBrowserWindow()->GetCurrentModule()));
 		}
 		else if (page == "root") {
-			//return new RootPageHandler<0>();
+			//return new RootPageHandler();
 			if (ResourceDelegate* resDelegate = ResourceManager::GetInstance().GetDelegate("root")) {
 				return new ManagerResourceHandler(resDelegate);
 			}
@@ -36,40 +36,56 @@ CefRefPtr<CefResourceHandler> ProjectC::Interface::Detail::ResourceSchemeHandler
 		BasicUniString temp;
 		UniString link = StringUtils::SubStringAfterFirst(request->GetURL(), temp, ":");
 		std::vector<StringUtils::SubStringInfo<UniString::char_type>> splittedStr;
-		SplitString(link, temp, ".", splittedStr);
+		SplitString(link, temp, "/", splittedStr);
 
-		UniString category = splittedStr[0];
-		if (splittedStr.size() >= 2) {
-			if (category == "module") {
-				switch (request->GetResourceType()) {
-				case RT_STYLESHEET:
-					return new ModuleResourceHandler<0>(std::get<0>(handler->GetBrowserWindow()->GetCurrentModule()), splittedStr[1]);
-				case RT_SCRIPT:
-					return new ModuleResourceHandler<1>(std::get<0>(handler->GetBrowserWindow()->GetCurrentModule()), splittedStr[1]);
-				default:
-					break;
-				}
+		if (splittedStr.size() < 2)
+			return nullptr;
+
+		UniString category{ splittedStr[0].String, splittedStr[0].Length, false };
+		if (category == "module") {
+			if (splittedStr.size() < 3) {
+				PROJC_LOG(WARN, "URL '", request->GetURL(), "' could not be evaluated to a resource. (key missing)");
 			}
-			else if (category == "manager") {
-				if (ResourceDelegate* resDelegate = ResourceManager::GetInstance().GetDelegate(splittedStr[1])) {
-					return new ManagerResourceHandler(resDelegate);
-				}
+			UniString type{ splittedStr[1].String, splittedStr[1].Length, false };
+			UniString key{ splittedStr[2].String, link.length() - (splittedStr[0].Length + splittedStr[1].Length), false };
+
+			if (type == "css") {
+				return new ModuleResourceHandler(std::get<0>(handler->GetBrowserWindow()->GetCurrentModule()), key, ResourceType::CSS);
+			}
+			else if (type == "js") {
+				return new ModuleResourceHandler(std::get<0>(handler->GetBrowserWindow()->GetCurrentModule()), key, ResourceType::JS);
+			}
+			else if (type == "res") {
+				return new ModuleResourceHandler(std::get<0>(handler->GetBrowserWindow()->GetCurrentModule()), key, ResourceType::UNKNOWN);
+			}
+		}
+		else if (category == "manager") {
+			if (splittedStr.size() < 2) {
+				PROJC_LOG(WARN, "URL '", request->GetURL(), "' could not be evaluated to a resource. (key missing)");
+			}
+			UniString key{ splittedStr[1].String, link.length() - splittedStr[0].Length, false };
+
+			if (ResourceDelegate* resDelegate = ResourceManager::GetInstance().GetDelegate(splittedStr[1].String)) {
+				return new ManagerResourceHandler(resDelegate);
+			}
+			else {
+				PROJC_LOG(WARN, "No resource delegate with key '", key, "' found.");
 			}
 		}
 		else if (category == "root") {
-			switch (request->GetResourceType()) {
-			case RT_STYLESHEET:
-				//return new RootResourceHandler<0>();
+			UniString type{ splittedStr[1].String, splittedStr[1].Length, false };
+
+			if (type == "css") {
+				//return new RootResourceHandler<ResourceType::CSS>();
 				if (ResourceDelegate* resDelegate = ResourceManager::GetInstance().GetDelegate("rootCSS")) {
 					return new ManagerResourceHandler(resDelegate);
 				}
-			case RT_SCRIPT:
-				//return new RootResourceHandler<1>();
+			}
+			else if (type == "js") {
+				//return new RootResourceHandler<ResourceType::JS>();
 				if (ResourceDelegate* resDelegate = ResourceManager::GetInstance().GetDelegate("rootJS")) {
 					return new ManagerResourceHandler(resDelegate);
 				}
-			default:
-				break;
 			}
 		}
 	}

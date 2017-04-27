@@ -17,7 +17,7 @@ namespace ProjectC::Interface::Detail {
 				LOG(INFO) << msg.Message;
 
 				const cef_string_utf16_t* strStruct = msg.Message.GetStruct();
-				WriteConsoleW(GetStdHandle(STD_OUTPUT_HANDLE), strStruct->str, strStruct->length, NULL, NULL);
+				WriteConsoleW(GetStdHandle(STD_OUTPUT_HANDLE), strStruct->str, static_cast<DWORD>(strStruct->length), NULL, NULL);
 			});
 			
 			PROJC_LOG(NORMAL, "Starting render process.");
@@ -68,7 +68,7 @@ namespace ProjectC::Interface::Detail {
 					m_jsApp->SetModule(argsList->GetString(1), argsList->GetInt(2));
 					break;
 				case (int32_t)RenderProcessMessageType::STR_RESOURCE_RESPONSE:
-					m_jsApp->ExecuteStringResCallback(argsList->GetString(1), argsList->GetInt(2), argsList->GetInt(3));
+					m_jsApp->ExecuteStringResCallback(argsList->GetValue(1), argsList->GetInt(2), argsList->GetInt(3));
 					break;
 				case (int32_t)RenderProcessMessageType::STATUSBAR_PUSH_STATUS:
 
@@ -81,10 +81,18 @@ namespace ProjectC::Interface::Detail {
 				case (int32_t)RenderProcessMessageType::EXEC_JS_CODE:
 				{
 					PROJC_LOG(NORMAL, "EXEC_JS_CODE: ", argsList->GetString(1));
-					UniString str = argsList->GetString(1);
+					CefRefPtr<CefValue> str = argsList->GetValue(1);
 					CefPostTask(TID_RENDERER, new Detail::FunctorTask([browser, str]() {
-						browser->GetMainFrame()->ExecuteJavaScript(str, "codeFromConsole", 0);
+						browser->GetMainFrame()->ExecuteJavaScript(str->GetString(), "codeFromConsole", 0);
 					}));
+					break;
+				}
+				case (int32_t)RenderProcessMessageType::WINDOW_TITLE_RESPONSE:
+				{
+					CefRefPtr<CefValue> str = argsList->GetValue(2);
+					m_jsApp->GetCallbacks().ExecuteById(argsList->GetInt(1), [str](CefRefPtr<CefV8Context> context, CefRefPtr<CefV8Value> callback) {
+						callback->ExecuteFunction(nullptr, { CefV8Value::CreateString(str->GetString()) });
+					});
 					break;
 				}
 				default:

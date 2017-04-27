@@ -10,7 +10,12 @@ namespace ProjectC::Interface::Detail {
 		ON_EXECUTE = 1,
 		EXEC_MODULE_LISTENER = 2,
 		GET_STR_RESOURCE = 3,
-		QUERY_RESPONSE = 4
+		QUERY_RESPONSE = 4,
+		GET_WINDOW_TITLE = 5,
+		SET_WINDOW_TITLE = 6,
+		SHOW_WINDOW = 7,
+		CLOSE_WINDOW = 8,
+		OPEN_WINDOW = 9
 	};
 
 	enum class RenderProcessMessageType : int32_t {
@@ -25,6 +30,7 @@ namespace ProjectC::Interface::Detail {
 		STATUSBAR_REMOVE_CHILDS_BY_ATTR = 8,
 		SHOW = 9,
 		QUERY = 10,
-		EXEC_JS_CODE = 11
+		EXEC_JS_CODE = 11,
+		WINDOW_TITLE_RESPONSE = 12
 	};
 }

@@ -51,12 +51,13 @@ ProjectC::Interface::ConsoleWindow::ConsoleWindow()
 						}
 						else if (arg1 == "/unpin") {
 							console.UnpinCommand();
-							console.Write("Unpinned command.");
-							console.Write("\n");
+							console.Write("Unpinned command.\n");
 							return true;
 						}
 					}
-					e.callback(console, args);
+					if (!e.callback(console, args)) {
+						console.Write("[Info] Command failed.\n");
+					}
 					return true;
 				}
 			}

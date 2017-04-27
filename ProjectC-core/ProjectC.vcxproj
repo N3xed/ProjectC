@@ -99,7 +99,7 @@
       <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\libs\cef;$(SolutionDir)Dependencies\libs\sdl;$(SolutionDir)Dependencies\libs\boost;$(SolutionDir)Dependencies\libs\awesomium;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <PreventDllBinding>
       </PreventDllBinding>
-      <AdditionalDependencies>awesomium.lib;SDL2.lib;winmm.lib;libcef.lib;libcef_dll_wrapper.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;libcef.lib;libcef_dll_wrapper.lib;Dwmapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AddModuleNamesToAssembly>
       </AddModuleNamesToAssembly>
     </Link>
@@ -118,10 +118,10 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\libs\cef;$(SolutionDir)Dependencies\libs\boost;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\libs\boost\x64;$(SolutionDir)Dependencies\libs\cef\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <PreventDllBinding>
       </PreventDllBinding>
-      <AdditionalDependencies>$(SolutionDir)Dependencies\libs\cef\libcef.lib;$(SolutionDir)Dependencies\libs\cef\libcef_dll_wrapper.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)Dependencies\libs\cef\x64\libcef.lib;$(SolutionDir)Dependencies\libs\cef\x64\libcef_dll_wrapper.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AddModuleNamesToAssembly>
       </AddModuleNamesToAssembly>
     </Link>
@@ -178,16 +178,15 @@
     <ClCompile Include="src\Interface\BrowserWindow.cpp" />
     <ClCompile Include="src\Interface\ConsoleWindow.cpp" />
     <ClCompile Include="src\Interface\Detail\Platform\ConsoleWindowWin.cpp" />
+    <ClCompile Include="src\Interface\Detail\Platform\WindowWin.cpp" />
     <ClCompile Include="src\Interface\Detail\ResourceHandlers.cpp" />
     <ClCompile Include="src\Interface\Detail\StatusbarImpl.cpp" />
     <ClCompile Include="src\Interface\GUIContext.cpp" />
     <ClCompile Include="src\Interface\Resources\ResourceManager.cpp" />
     <ClCompile Include="src\Interface\Detail\SchemeHandlerFactory.cpp" />
-    <ClCompile Include="src\Interface\Detail\Platform\BrowserWindowWin.cpp" />
-    <ClCompile Include="src\Interface\Detail\Platform\WindowManagerWin.cpp" />
-    <ClCompile Include="src\Interface\Detail\Platform\WindowWin.cpp" />
     <ClCompile Include="src\Interface\Localization\StringResources.cpp" />
-    <ClCompile Include="src\Interface\WindowManager.cpp" />
+    <ClCompile Include="src\Interface\Window.cpp" />
+    <ClCompile Include="src\Interface\BrowserWindowManager.cpp" />
     <ClCompile Include="src\Logging.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Modules\DynamicLibrary.cpp" />
@@ -209,6 +208,7 @@
     <ClInclude Include="src\Bootstrap.h" />
     <ClInclude Include="src\Config.h" />
     <ClInclude Include="src\ConfigKeys.h" />
+    <ClInclude Include="src\Exception.hpp" />
     <ClInclude Include="src\FactoryManager.h" />
     <ClInclude Include="src\IDisposable.h" />
     <ClInclude Include="src\IHandle.h" />
@@ -217,16 +217,14 @@
     <ClInclude Include="src\Interface\ConsoleWindow.h" />
     <ClInclude Include="src\Interface\Detail\JSApp.hpp" />
     <ClInclude Include="src\Interface\Detail\FunctorTask.hpp" />
-    <ClInclude Include="src\Interface\Detail\Platform\BrowserHandlerWin.h" />
-    <ClInclude Include="src\Interface\Detail\Platform\BrowserWindowWin.h" />
     <ClInclude Include="src\Interface\BrowserWindow.h" />
     <ClInclude Include="src\Interface\Detail\Platform\ConsoleWindowWin.h" />
-    <ClInclude Include="src\Interface\Detail\Platform\WindowManagerWin.h" />
+    <ClInclude Include="src\Interface\Detail\Platform\WindowWin.h" />
     <ClInclude Include="src\Interface\Detail\StatusbarImpl.h" />
     <ClInclude Include="src\Interface\Detail\V8HandlerList.hpp" />
+    <ClInclude Include="src\Interface\Detail\V8Utils.hpp" />
     <ClInclude Include="src\Interface\GUIContext.h" />
     <ClInclude Include="src\Interface\IStatusbar.h" />
-    <ClInclude Include="src\Interface\IWindow.h" />
     <ClInclude Include="src\Interface\IClosable.h" />
     <ClInclude Include="src\Interface\IPeerInfo.h" />
     <ClInclude Include="src\Interface\NavigationElement.h" />
@@ -235,13 +233,14 @@
     <ClInclude Include="src\Interface\ProjectCHandler.h" />
     <ClInclude Include="src\Interface\Localization\LanguageHelper.h" />
     <ClInclude Include="src\Interface\Localization\StringKeys.h" />
-    <ClInclude Include="src\Interface\Detail\Platform\WindowWin.h" />
     <ClInclude Include="src\Interface\Detail\RenderProcessHandler.hpp" />
     <ClInclude Include="src\Interface\Detail\ResourceHandlers.h" />
     <ClInclude Include="src\Interface\Resources\ResourceManager.h" />
     <ClInclude Include="src\Interface\Detail\SchemeHandlerFactory.h" />
-    <ClInclude Include="src\Interface\WindowManager.h" />
+    <ClInclude Include="src\Interface\Window.h" />
+    <ClInclude Include="src\Interface\BrowserWindowManager.h" />
     <ClInclude Include="src\HandlerList.h" />
+    <ClInclude Include="src\Interface\BrowserWindowStyle.hpp" />
     <ClInclude Include="src\InvocationList.h" />
     <ClInclude Include="src\Logging.h" />
     <ClInclude Include="src\Modules\DynamicLibrary.h" />
